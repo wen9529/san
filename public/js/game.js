@@ -1,50 +1,43 @@
+import { CardRenderer } from './card_renderer.js';
+import { SocketHandler } from './socket_handler.js';
+
 class GameClient {
     constructor() {
-        this.cards = [];
-        this.selected = new Set();
         this.renderer = new CardRenderer();
-        this.socketHandler = new SocketHandler(this);
+        this.socket = new SocketHandler(this);
+        this.selectedCards = new Set();
+        
+        this.initUIListeners();
     }
 
-    initGame(cards) {
-        this.cards = cards;
-        this.renderHand();
-        this.setupInteractions();
-    }
+    initUIListeners() {
+        document.getElementById('create-btn').addEventListener('click', () => {
+            const username = document.getElementById('username').value;
+            this.socket.createRoom(username);
+        });
 
-    renderHand() {
-        const container = document.querySelector('.player-hand');
-        this.renderer.renderHand(this.cards, container);
-    }
+        document.getElementById('join-btn').addEventListener('click', () => {
+            const roomId = document.getElementById('roomId').value;
+            const username = document.getElementById('username').value;
+            this.socket.joinRoom(roomId, username);
+        });
 
-    setupInteractions() {
-        document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('click', () => {
-                const code = card.dataset.cardCode;
-                this.toggleSelect(code);
-                card.classList.toggle('selected');
-            });
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            this.submitCards();
         });
     }
 
-    toggleSelect(code) {
-        if (this.selected.has(code)) {
-            this.selected.delete(code);
-        } else {
-            this.selected.add(code);
-        }
-        document.getElementById('selected-count').textContent = this.selected.size;
-    }
-
     submitCards() {
-        if (this.selected.size !== 13) {
-            alert('请选择13张牌进行出牌！');
-            return;
+        if (this.selectedCards.size === 13) {
+            this.socket.submitPlay([...this.selectedCards]);
+            this.selectedCards.clear();
+        } else {
+            alert('请选择13张牌！');
         }
-        this.socketHandler.submitPlay([...this.selected]);
-        this.selected.clear();
     }
 }
 
 // 初始化游戏
-const gameClient = new GameClient();
+window.addEventListener('DOMContentLoaded', () => {
+    new GameClient();
+});
