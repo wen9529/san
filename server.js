@@ -1,78 +1,58 @@
+// server.js
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import os from 'os'; // 修复的OS模块引入
+import os from 'os';
 
-// 解决ESM路径问题
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const httpServer = createServer(app);
+
+// 增强CORS配置
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true
   }
 });
 
-// 强制设置MIME类型中间件
-app.use((req, res, next) => {
-  if (req.url.endsWith('.js')) {
-    res.setHeader('Content-Type', 'application/javascript');
-  }
-  next();
-});
-
-// 静态资源托管
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 房间管理系统
-const rooms = new Map();
-
-io.on('connection', (socket) => {
-  console.log(`[${new Date().toISOString()}] 客户端连接: ${socket.id}`);
-
-  // 房间创建逻辑
-  socket.on('create_room', (username) => {
-    const roomId = generateRoomId();
-    rooms.set(roomId, {
-      players: [{ id: socket.id, username, ready: false }],
-      gameState: 'waiting',
-      cards: []
-    });
-    socket.join(roomId);
-    socket.emit('room_created', roomId);
-  });
-
-  // 其他保持原有代码...
+// 添加心跳检测
+io.engine.on("connection", (socket) => {
+  console.log(`Socket连接ID: ${socket.id}`);
 });
 
-// 获取本机IP函数（已修复）
-function getLocalIP() {
-  const interfaces = os.networkInterfaces(); // 正确引入方式
-  for (const devName in interfaces) {
-    const iface = interfaces[devName];
-    for (const alias of iface) {
-      if (alias.family === 'IPv4' && !alias.internal) {
-        return alias.address;
-      }
-    }
+io.on('connection', (socket) => {
+  console.log('客户端连接成功:', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('客户端断开:', socket.id);
+  });
+});
+
+// 错误处理
+httpServer.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error('端口3000被占用！');
+    process.exit(1);
   }
-  return '0.0.0.0';
-}
+});
 
-// 保持其他函数不变...
-
-// 启动服务器
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`
-  ===================================
-  服务器运行中 ➤ http://localhost:${PORT}
-  局域网访问 ➤ http://${getLocalIP()}:${PORT}
-  ===================================
-  `);
+  const ifaces = os.networkInterfaces();
+  Object.keys(ifaces).forEach((ifname) => {
+    ifaces[ifname].forEach((iface) => {
+      if ('IPv4' === iface.family && !iface.internal) {
+        console.log(`访问地址: http://${iface.address}:${PORT}`);
+      }
+    });
+  });
 });
