@@ -1,14 +1,40 @@
-// public/js/card_renderer.js
 export class CardRenderer {
-  constructor() {
-    this.cardTemplate = document.getElementById('card-template');
-  }
+    constructor() {
+        this.template = document.getElementById('card-template');
+    }
 
-  renderCard(cardData) {
-    // 实现渲染逻辑（同之前代码）
-  }
+    renderCard(cardData) {
+        const clone = this.template.content.cloneNode(true);
+        const card = clone.querySelector('.card');
+        const frontImg = clone.querySelector('.card-front');
+        
+        card.dataset.cardCode = cardData.code;
+        frontImg.src = `/images/${this.getImagePath(cardData)}`;
+        
+        return clone;
+    }
 
-  renderHand(cards, container) {
-    // 实现手牌渲染（同之前代码）
-  }
+    getImagePath(card) {
+        const suitMap = {
+            'c': 'clubs',
+            'd': 'diamonds',
+            'h': 'hearts',
+            's': 'spades'
+        };
+        
+        const rank = card.rank === 1 ? 'ace' : 
+                    card.rank === 11 ? 'jack' :
+                    card.rank === 12 ? 'queen' :
+                    card.rank === 13 ? 'king' : card.rank;
+        
+        return `${suitMap[card.code.slice(-1)]}/${rank}_of_${suitMap[card.code.slice(-1)]}.png`;
+    }
+
+    renderHand(cards, container) {
+        container.innerHTML = '';
+        cards.forEach(card => {
+            const cardElement = this.renderCard(card);
+            container.appendChild(cardElement);
+        });
+    }
 }
