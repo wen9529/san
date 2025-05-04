@@ -1,1 +1,11 @@
-echo '{"type": "module"}' > package.json
+{
+  "name": "thirteen-water",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "十三水游戏服务器",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "MIT"
+}
