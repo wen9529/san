@@ -1,39 +1,16 @@
-// utils/card_mapper.js
-const SUITS = {
-  'clubs': '♣',
-  'diamonds': '♦',
-  'hearts': '♥',
-  'spades': '♠'
+const SUITS = ['clubs', 'diamonds', 'hearts', 'spades'];
+const RANK_MAP = {
+    1: 'ace', 11: 'jack', 12: 'queen', 13: 'king'
 };
 
-const RANKS = {
-  1: 'ace',
-  11: 'jack',
-  12: 'queen',
-  13: 'king'
-};
+export const CARD_MAP = new Map();
 
-// 生成图片路径映射表
-function generateCardMap() {
-  const cardMap = new Map();
-  
-  // 遍历所有花色
-  Object.entries(SUITS).forEach(([suitKey, suitSymbol]) => {
-    // 生成1-13的牌
+SUITS.forEach(suit => {
     for (let rank = 1; rank <= 13; rank++) {
-      const rankKey = RANKS[rank] || rank;
-      const fileName = `${rankKey}_of_${suitKey}.png`;
-      const cardValue = {
-        suit: suitSymbol,
-        rank: rank,
-        code: `${rank.toString().padStart(2, '0')}${suitKey[0]}` // 例如: 10c
-      };
-      cardMap.set(cardValue.code, fileName);
+        const code = `${String(rank).padStart(2, '0')}${suit[0]}`;
+        const fileName = `${RANK_MAP[rank] || rank}_of_${suit}.png`;
+        CARD_MAP.set(code, fileName);
     }
-  });
-  
-  return cardMap;
-}
+});
 
-// 导出映射表
-export const CARD_MAP = generateCardMap();
+// 示例：梅花10 → 10c → 10_of_clubs.png
