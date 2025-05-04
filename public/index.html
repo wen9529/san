@@ -1,32 +1,30 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>十三水在线游戏</title>
+    <title>十三水</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="game-container">
-        <div class="room-panel">
-            <input type="text" id="username" placeholder="输入昵称">
-            <button onclick="createRoom()">创建房间</button>
-            <input type="text" id="roomId" placeholder="输入房间号">
-            <button onclick="joinRoom()">加入房间</button>
-        </div>
-        
-        <div class="game-board">
-            <div class="opponent-area"></div>
-            <div class="player-hand"></div>
-        </div>
-        
-        <div class="control-panel">
-            <button onclick="submitCards()">出牌</button>
-            <span id="selected-count">已选0张</span>
-        </div>
+    <div class="header">
+        <input type="text" id="username" placeholder="玩家昵称">
+        <input type="text" id="roomId" placeholder="房间号">
+        <button id="create-btn">创建房间</button>
+        <button id="join-btn">加入房间</button>
     </div>
-    
+
+    <div class="game-area">
+        <div class="player-hand"></div>
+        <button id="submit-btn">出牌 (已选<span id="count">0</span>张)</button>
+    </div>
+
+    <template id="card-template">
+        <div class="card">
+            <img src="/images/back.png" class="card-back">
+            <img src="" class="card-front">
+        </div>
+    </template>
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/socket_handler.js"></script>
-    <script src="/js/game.js"></script>
+    <script type="module" src="/js/game.js"></script>
 </body>
 </html>
