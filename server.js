@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import os from 'os';
-import { Game } from './game_logic/game.js';
+const Game = require('./game_logic/game.js');
 
 // Get directory and file names for static file serving
 const __filename = fileURLToPath(import.meta.url);
