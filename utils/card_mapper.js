@@ -1,16 +1,47 @@
-const SUITS = ['clubs', 'diamonds', 'hearts', 'spades'];
-const RANK_MAP = {
-    1: 'ace', 11: 'jack', 12: 'queen', 13: 'king'
+/**
+ * @fileoverview Card mapping utility functions.
+ */
+
+const SUITS = ['C', 'D', 'H', 'S']; // Clubs, Diamonds, Hearts, Spades
+const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+/**
+ * Generates a unique card code from a suit and a rank.
+ *
+ * @param {string} suit - The suit of the card ('C', 'D', 'H', 'S').
+ * @param {string} rank - The rank of the card ('2', '3', ..., '10', 'J', 'Q', 'K', 'A').
+ * @returns {string} A unique code for the card (e.g., 'C2', 'DJ', 'HA').
+ */
+const getCardCode = (suit, rank) => `${suit}${rank}`;
+
+/**
+ * Maps a card code to its corresponding image file name.
+ *
+ * @param {string} cardCode - The card code (e.g., 'C2', 'DJ', 'HA').
+ * @returns {string} The image file name of the card (e.g., '2_of_clubs.png').
+ */
+const mapCardCodeToImageName = (cardCode) => {
+    const suit = cardCode.slice(0, 1);
+    const rank = cardCode.slice(1);
+    const suitName = {
+        'C': 'clubs', 'D': 'diamonds', 'H': 'hearts', 'S': 'spades'
+    }[suit];
+    const rankName = rank === 'J' || rank === 'Q' || rank === 'K' || rank === 'A' ?
+        `${rank.toLowerCase()}` : rank;
+    return `${rankName}_of_${suitName}.png`;
 };
 
-export const CARD_MAP = new Map();
-
-SUITS.forEach(suit => {
-    for (let rank = 1; rank <= 13; rank++) {
-        const code = `${String(rank).padStart(2, '0')}${suit[0]}`;
-        const fileName = `${RANK_MAP[rank] || rank}_of_${suit}.png`;
-        CARD_MAP.set(code, fileName);
-    }
-});
-
-// 示例：梅花10 → 10c → 10_of_clubs.png
+/**
+ * Generates all possible card codes and maps them to their image file names.
+ *
+ * @returns {Map<string, string>} A map of card codes to image file names.
+ */
+export const generateAllCards = () => {
+    const cardMap = new Map();
+    SUITS.forEach(suit => {
+        RANKS.forEach(rank => {
+            cardMap.set(getCardCode(suit, rank), mapCardCodeToImageName(getCardCode(suit, rank)));
+        });
+    });
+    return cardMap;
+};
