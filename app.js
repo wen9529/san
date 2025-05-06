@@ -17,13 +17,16 @@ const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'sha256-INIT_HASH'"],
+      scriptSrc: [
+        "'self'", 
+        (req, res) => `'sha256-${res.locals.cspHash}'`
+      ],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:"]
+      imgSrc: ["'self'", "data:"],
+      formAction: ["'self'"]
     }
   },
-  crossOriginEmbedderPolicy: true,
-  hsts: { maxAge: 31536000 }
+  crossOriginOpenerPolicy: false // 临时关闭COOP
 });
 
 // 中间件配置
