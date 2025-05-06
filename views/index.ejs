@@ -1,45 +1,37 @@
-<!-- views/index.ejs 修正后的代码 -->
+<!-- views/index.ejs -->
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>锄大地 Online</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>锄大地 - 扑克牌演示</h1>
-    
-    <!-- 修正后的卡片容器 -->
-    <div class="card-container">
-        <% cards.forEach(card => { %>
-            <div class="card" data-suit="<%= card.suit %>" data-rank="<%= card.rank %>">
-                <img src="/images/<%= card.rank === 'back' ? 'back.png' : `${card.rank}_of_${card.suit}.png` %>" 
-                     alt="<%= card.toString() %>">
-                <div class="card-info"><%= card.toString() %></div>
-            </div>
-        <% }); %>
+    <header>
+        <h1>🃏 锄大地游戏大厅</h1>
+        <div id="connection-status">连接状态：<span class="disconnected">断开</span></div>
+    </header>
+
+    <div class="game-container">
+        <div class="card-grid">
+            <% cards.forEach(card => { %>
+                <div class="card" 
+                     data-suit="<%= card.suit %>" 
+                     data-rank="<%= card.rank %>"
+                     data-image="<%= card.imagePath %>">
+                    <img src="<%= card.imagePath %>" 
+                         alt="<%= card.toString() %>"
+                         onerror="this.src='/images/back.png'">
+                    <div class="card-label"><%= card.toString() %></div>
+                </div>
+            <% }); %>
+        </div>
     </div>
 
-    <!-- 修正后的脚本加载顺序 -->
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        // 自动重连机制
-        let socket;
-        function connectSocket() {
-            socket = io.connect('http://localhost:3000');
-            
-            socket.on('connect', () => {
-                console.log('Socket连接成功');
-            });
-            
-            socket.on('disconnect', () => {
-                console.log('Socket断开，5秒后重连...');
-                setTimeout(connectSocket, 5000);
-            });
-        }
-        connectSocket();
-    </script>
-    <script src="/js/card_renderer.js"></script>
-    <script src="/js/socket_handler.js"></script>
-    <script src="/js/game.js"></script>
+    <script src="/js/socketHandler.js"></script>
+    <script src="/js/cardLogic.js"></script>
+    <script src="/js/gameInit.js"></script>
 </body>
 </html>
