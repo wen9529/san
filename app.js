@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res) => {
     res.set('Cache-Control', 'no-store');
   }
-});
+}));  // 增加一个闭合括号
 
 // 视图引擎
 app.set('view engine', 'ejs');
