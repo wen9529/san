@@ -1,70 +1,78 @@
-// app.js
+// app.js 完整代码
 const express = require('express');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const helmet = require('helmet');
-const crypto = require('node:crypto');
-const fs = require('node:fs');
+const crypto = require('crypto');
+const fs = require('fs');
 
 // 初始化应用
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// 安全配置
-const securityHeaders = helmet({
+// 动态生成哈希值
+const generateHashes = () => {
+  const files = ['socket_handler.js', 'card_renderer.js'];
+  return files.reduce((acc, file) => {
+    try {
+      const content = fs.readFileSync(path.join(__dirname, 'public/js', file));
+      acc[file] = crypto.createHash('sha256').update(content).digest('base64');
+    } catch (error) {
+      console.error(`⚠️ 文件读取错误: ${file}`, error);
+      acc[file] = 'INVALID_HASH';
+    }
+    return acc;
+  }, {});
+};
+
+// 安全头配置（精确调整版）
+app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: [
-        "'self'", 
-        (req, res) => `'sha256-${res.locals.cspHash}'`
-      ],
+      scriptSrc: ["'self'", (req, res) => {
+        const hashes = generateHashes();
+        return `'sha256-${hashes.socket_handler.js}' 'sha256-${hashes.card_renderer.js}'`;
+      }],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:"],
-      formAction: ["'self'"]
+      formAction: ["'self'"],
+      connectSrc: ["'self'"]
     }
   },
-  crossOriginOpenerPolicy: false // 临时关闭COOP
-});
+  crossOriginOpenerPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 
-// 中间件配置
-app.use(securityHeaders);
+// 静态资源配置
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res) => {
     res.set('Cache-Control', 'no-store');
   }
-}));  // 增加一个闭合括号
+}));
 
-// 视图引擎
+// 视图引擎配置
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 端口管理
+// 端口管理（增强版）
 const PORT = 3000;
-const releasePort = () => {
-  require('child_process').exec(`fuser -k ${PORT}/tcp`, () => {
-    server.listen(PORT, () => {
-      console.log(`🚀 服务已启动: http://localhost:${PORT}`);
+const killPortProcess = () => {
+  return new Promise((resolve) => {
+    require('child_process').exec(`lsof -i :${PORT} | grep LISTEN | awk '{print $2}' | xargs kill -9`, (err) => {
+      if (err) console.log('🔄 端口未占用');
+      resolve();
     });
   });
 };
-
-process.on('uncaughtException', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.log('🔄 强制释放端口...');
-    releasePort();
-  } else {
-    console.error('❌ 未捕获异常:', err);
-  }
-});
 
 // 扑克牌核心类
 class Card {
   static SUITS = {
     clubs: '♣',
-    spades: '♠',
+    spades: '♠', 
     diamonds: '♦',
     hearts: '♥'
   };
@@ -95,9 +103,9 @@ class Card {
   }
 }
 
-// 路由
+// 路由处理
 app.get('/', (req, res) => {
-  const cards = [
+  const demoCards = [
     '10_of_clubs.png',
     'ace_of_spades.png',
     'king_of_diamonds.png',
@@ -107,21 +115,12 @@ app.get('/', (req, res) => {
   ].map(f => new Card(f));
 
   res.render('index', { 
-    cards,
-    hashes: {
-      socket: generateHash('socket_handler.js'),
-      card: generateHash('card_renderer.js')
-    }
+    cards: demoCards,
+    hashes: generateHashes()
   });
 });
 
-// 哈希生成函数
-const generateHash = (filename) => {
-  const content = fs.readFileSync(path.join(__dirname, 'public/js', filename));
-  return crypto.createHash('sha256').update(content).digest('base64');
-};
-
-// Socket.IO
+// Socket.IO事件处理
 io.on('connection', (socket) => {
   console.log(`🔗 客户端连接: ${socket.id.slice(0,6)}`);
   
@@ -138,5 +137,25 @@ io.on('connection', (socket) => {
   });
 });
 
+// 启动服务（安全模式）
+const startServer = async () => {
+  await killPortProcess();
+  
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`
+    ===================================
+    🚀 服务已安全启动
+    🌐 访问地址: http://localhost:${PORT}
+    ===================================
+    `);
+  });
+};
+
+// 异常处理
+process.on('uncaughtException', (err) => {
+  console.error('❌ 致命错误:', err);
+  startServer(); // 自动重启
+});
+
 // 启动服务
-releasePort();
+startServer();
