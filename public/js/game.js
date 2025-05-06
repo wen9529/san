@@ -1,4 +1,4 @@
-// import { CardRenderer } from './card_renderer.js'; // We will use global renderer in this example
+import { CardRenderer } from './card_renderer.js'; // We will use global renderer in this example
 // import { SocketHandler } from './socket_handler.js'; // We will use global socket in this example
 
 class Game {
@@ -10,25 +10,25 @@ class Game {
       this.myCards = [];
       this.username = null;
       this.players = [];
-  
+
       this.initUIListeners();
     }
-  
+
     initUIListeners() {
       this.gameStatus = document.getElementById('game-status');
       document.getElementById('create-btn').addEventListener('click', () => {
         this.handleCreateRoom();
       });
-  
+
       document.getElementById('join-btn').addEventListener('click', () => {
         this.handleJoinRoom();
       });
-  
+
       document.getElementById('submit-btn').addEventListener('click', () => {
         this.handleSubmitCards();
       });
     }
-  
+
     handleCreateRoom() {
       this.username = document.getElementById('username').value;
       if (!this.username) {
@@ -37,7 +37,7 @@ class Game {
       }
       this.socket.createRoom(this.username);
     }
-  
+
     handleJoinRoom() {
       this.roomId = document.getElementById('roomId').value;
       this.username = document.getElementById('username').value;
@@ -47,7 +47,7 @@ class Game {
       }
       this.socket.joinRoom(this.roomId, this.username);
     }
-  
+
     handleSubmitCards() {
       if (this.selectedCards.size === 13) {
         this.socket.submitPlay([...this.selectedCards]);
@@ -56,35 +56,35 @@ class Game {
         alert('请选择13张牌！');
       }
     }
-  
+
     handleRoomCreated(roomId) {
       this.roomId = roomId;
       alert(`房间创建成功！房间号：${roomId}`);
       console.log(`Room ${roomId} created.`);
     }
-  
+
     handlePlayerJoined(players) {
       this.players = players;
       this.updateGameStatus('当前房间玩家：' + this.players.map(p => p.username).join(', '));
     }
-  
+
     handleGameStart(cards) {
       this.myCards = cards;
       this.updateGameStatus('游戏开始！你的牌：' + this.myCards.join(', '));
       this.renderer.renderCards(this.myCards);
     }
-    
+
     handleOpponentPlay(cards) {
       this.updateGameStatus('对手出牌：' + cards.join(', '));
     }
-  
+
     handleInvalidMove(message) {
       this.updateGameStatus("出牌失败");
 
       alert(`Invalid move: ${message}`);
       this.clearSelectedCards();
     }
-  
+
     clearSelectedCards() {
       this.selectedCards.clear();
       // Optionally, you can add code here to visually unselect cards in the UI
