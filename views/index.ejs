@@ -1,40 +1,35 @@
-<!-- views/index.ejs 安全增强版 -->
+<!-- views/index.ejs -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
-    <!-- 其他头部内容保持不变 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-<%= hashes.socket %>' 'sha256-<%= hashes.card %>'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+    <title>锄大地 Online</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <!-- 页面内容保持不变 -->
+    <header class="game-header">
+        <h1>🃏 锄大地</h1>
+        <div id="connection-status" class="connected">🟢 已连接</div>
+    </header>
 
-    <!-- 安全加载脚本 -->
-    <script src="/socket.io/socket.io.js" integrity="sha384-..."></script>
-    <script src="/js/socket_handler.js" integrity="sha256-<%= scriptHashes['socket_handler.js'] %>"></script>
-    <script src="/js/card_renderer.js" integrity="sha256-<%= scriptHashes['card_renderer.js'] %>"></script>
-    
-    <!-- 脚本加载监控 -->
-    <script>
-    (function(){
-      const ALLOWED_SCRIPTS = {
-        '/socket.io/socket.io.js': true,
-        '/js/socket_handler.js': true,
-        '/js/card_renderer.js': true
-      };
+    <main class="game-board">
+        <% cards.forEach(card => { %>
+            <div class="game-card" 
+                 data-suit="<%= card.suit %>"
+                 data-rank="<%= card.rank %>"
+                 data-image="<%= card.image %>">
+                <img src="<%= card.image %>" 
+                     alt="<%= card.toString() %>"
+                     onerror="this.src='/images/back.png'">
+                <div class="card-label"><%= card.toString() %></div>
+            </div>
+        <% }); %>
+    </main>
 
-      // 脚本加载异常监控
-      window.addEventListener('error', function(e) {
-        if (!ALLOWED_SCRIPTS[e.filename]) {
-          console.error('非法脚本入侵:', e.filename);
-          document.body.innerHTML = `
-            <h1 style="color:red;padding:20px">
-              安全警报！检测到非法脚本：${e.filename}
-            </h1>
-          `;
-          window.stop();
-        }
-      }, true);
-    })();
-    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/socket_handler.js" integrity="sha256-<%= hashes.socket %>"></script>
+    <script src="/js/card_renderer.js" integrity="sha256-<%= hashes.card %>"></script>
 </body>
 </html>
