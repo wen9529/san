@@ -1,44 +1,63 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 
+// 配置视图引擎
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
 
+// 静态文件目录
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 扑克牌解析逻辑
 class Card {
-  constructor(suit, rank) {
-    this.suit = suit;
-    this.rank = rank;
-    this.img = `${suit}${rank}.png`;
-    this.value = {'2':15,A:14,K:13,Q:12,J:11,10:10,9:9,8:8,7:7,6:6,5:5,4:4,3:3}[rank];
+  constructor(filename) {
+    const parts = filename.replace('.png', '').split('_');
+    this.suit = this.parseSuit(parts.pop());
+    this.rank = this.parseRank(parts.join('_'));
+  }
+
+  parseSuit(suit) {
+    const suits = {
+      clubs: '♣',
+      spades: '♠',
+      diamonds: '♦',
+      hearts: '♥'
+    };
+    return suits[suit] || '';
+  }
+
+  parseRank(rank) {
+    const ranks = {
+      ace: 'A',
+      jack: 'J',
+      queen: 'Q',
+      king: 'K'
+    };
+    return ranks[rank] || rank;
+  }
+
+  toString() {
+    return `${this.rank}${this.suit}`;
   }
 }
 
-class Deck {
-  constructor() {
-    const suits = ['S','H','C','D'];
-    const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-    this.cards = suits.flatMap(s => ranks.map(r => new Card(s,r)));
-    this.shuffle();
-  }
-
-  shuffle() {
-    for (let i = this.cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
-    }
-  }
-
-  deal() {
-    return Array.from({length:4}, (_,i) => 
-      this.cards.slice(i*13, (i+1)*13)
-       .sort((a,b) => b.value - a.value)
-    );
-  }
-}
-
+// 路由
 app.get('/', (req, res) => {
-  const deck = new Deck();
-  res.render('game', { players: deck.deal() });
+  // 示例牌组
+  const exampleCards = [
+    '10_of_clubs.png',
+    'ace_of_spades.png',
+    'king_of_diamonds.png',
+    'queen_of_hearts.png',
+    'jack_of_spades.png'
+  ].map(filename => new Card(filename));
+
+  res.render('index', { 
+    cards: exampleCards,
+    backCard: new Card('back.png')
+  });
 });
 
-app.listen(3000, () => console.log('Running on port 3000'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
