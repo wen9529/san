@@ -1,5 +1,5 @@
-import { CardRenderer } from './card_renderer.js';
-import { SocketHandler } from './socket_handler.js';
+// import { CardRenderer } from './card_renderer.js'; // We will use global renderer in this example
+// import { SocketHandler } from './socket_handler.js'; // We will use global socket in this example
 
 class Game {
     constructor() {
@@ -7,6 +7,7 @@ class Game {
       this.socket = new SocketHandler(this);
       this.selectedCards = new Set();
       this.roomId = null;
+      this.myCards = [];
       this.username = null;
       this.players = [];
   
@@ -14,6 +15,7 @@ class Game {
     }
   
     initUIListeners() {
+      this.gameStatus = document.getElementById('game-status');
       document.getElementById('create-btn').addEventListener('click', () => {
         this.handleCreateRoom();
       });
@@ -63,14 +65,22 @@ class Game {
   
     handlePlayerJoined(players) {
       this.players = players;
-      console.log('当前房间玩家：', this.players);
+      this.updateGameStatus('当前房间玩家：' + this.players.map(p => p.username).join(', '));
     }
   
-    handleGameStart() {
-      console.log('Game Start');
+    handleGameStart(cards) {
+      this.myCards = cards;
+      this.updateGameStatus('游戏开始！你的牌：' + this.myCards.join(', '));
+      this.renderer.renderCards(this.myCards);
+    }
+    
+    handleOpponentPlay(cards) {
+      this.updateGameStatus('对手出牌：' + cards.join(', '));
     }
   
     handleInvalidMove(message) {
+      this.updateGameStatus("出牌失败");
+
       alert(`Invalid move: ${message}`);
       this.clearSelectedCards();
     }
@@ -81,6 +91,9 @@ class Game {
     }
 
     addSelectedCard(card){
+      this.renderer.toggleCardSelect(card);
+      this.updateGameStatus("add card "+card)
+
       this.selectedCards.add(card)
     }
     removeSelectedCard(card){
@@ -88,7 +101,32 @@ class Game {
     }
 }
 
+class SocketHandler {
+    constructor(game) {
+        this.game = game;
+        this.socket = io(); // Connect to the server
+        this.socket.on('roomCreated', roomId => this.game.handleRoomCreated(roomId));
+        this.socket.on('playerJoined', players => this.game.handlePlayerJoined(players));
+        this.socket.on('gameStart', cards => this.game.handleGameStart(cards));
+        this.socket.on('opponentPlay', cards => this.game.handleOpponentPlay(cards));
+        this.socket.on('invalidMove', message => this.game.handleInvalidMove(message));
+    }
+    createRoom(username) {
+        this.socket.emit('createRoom', username);
+    }
+    joinRoom(roomId, username) {
+        this.socket.emit('joinRoom', roomId, username);
+    }
+    submitPlay(cards) {
+        this.socket.emit('submitPlay', cards);
+    }
+}
+
+Game.prototype.updateGameStatus = function(status) {
+    this.gameStatus.innerText = status;
+}
 
 window.addEventListener('DOMContentLoaded', () => {
-    new Game();
+  window.game = new Game();
+  window.SocketHandler = SocketHandler;
 });

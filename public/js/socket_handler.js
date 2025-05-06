@@ -1,20 +1,33 @@
-import { io } from '/socket.io/socket.io.esm.min.js';
-
-export class SocketHandler {
-    constructor(gameClient) {
+class SocketHandler {
+    constructor(gameClient, url = 'http://localhost:3000') {
         this.game = gameClient;
-        this.socket = io('http://localhost:3000');
+        this.url = url;
+        this.socket = null;
         this.currentRoom = null;
+        this.connect();
+    }
 
-        // 事件绑定
-        this.socket.on('connect', () => this.handleConnect());
-        this.socket.on('room_created', (roomId) => this.handleRoomCreated(roomId));
-        this.socket.on('player_joined', (players) => this.handlePlayerJoined(players));
+    connect() {
+        this.socket = io(this.url);
+        this.socket.on('connect', () => {
+            console.log('成功连接到游戏服务器');
+        });
+        this.socket.on('room_created', (roomId) => {
+            this.currentRoom = roomId;
+            alert(`房间创建成功！房间号：${roomId}`);
+        });
+        this.socket.on('player_joined', (players) => {
+            console.log('当前房间玩家：', players);
+        });
+        // Add event to update game status
+        this.socket.on('game_update', (gameData) => {
+            this.game.updateGame(gameData);
+        });
     }
 
     createRoom(username) {
         this.socket.emit('create_room', username);
-    }
+    } 
 
     joinRoom(roomId, username) {
         this.socket.emit('join_room', roomId, username);
@@ -26,17 +39,8 @@ export class SocketHandler {
             cards: cards
         });
     }
-
-    handleConnect() {
-        console.log('成功连接到游戏服务器');
-    }
-
-    handleRoomCreated(roomId) {
-        this.currentRoom = roomId;
-        alert(`房间创建成功！房间号：${roomId}`);
-    }
-
-    handlePlayerJoined(players) {
-        console.log('当前房间玩家：', players);
-    }
 }
+
+// Make SocketHandler available globally
+window.SocketHandler = SocketHandler;
+export default SocketHandler;
