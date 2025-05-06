@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>锄大地 Online</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>锄大地 - 扑克牌演示</h1>
+    
+    <div class="card-container">
+        <% cards.forEach(card => { %>
+            <div class="card">
+                <img src="/images/<%= card.rank === 'back' ? 'back.png' : `${card}_of_${card.suit}.png` %>" 
+                     alt="<%= card.toString() %>"
+                     data-rank="<%= card.rank %>"
+                     data-suit="<%= card.suit %>">
+                <div class="card-info"><%= card.toString() %></div>
+            </div>
+        <% }); %>
+    </div>
+
+    <script src="/js/game.js"></script>
+</body>
+</html>
