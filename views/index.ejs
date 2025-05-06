@@ -1,3 +1,4 @@
+<!-- views/index.ejs 修正后的代码 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,18 +8,38 @@
 <body>
     <h1>锄大地 - 扑克牌演示</h1>
     
+    <!-- 修正后的卡片容器 -->
     <div class="card-container">
         <% cards.forEach(card => { %>
-            <div class="card">
-                <img src="/images/<%= card.rank === 'back' ? 'back.png' : `${card}_of_${card.suit}.png` %>" 
-                     alt="<%= card.toString() %>"
-                     data-rank="<%= card.rank %>"
-                     data-suit="<%= card.suit %>">
+            <div class="card" data-suit="<%= card.suit %>" data-rank="<%= card.rank %>">
+                <img src="/images/<%= card.rank === 'back' ? 'back.png' : `${card.rank}_of_${card.suit}.png` %>" 
+                     alt="<%= card.toString() %>">
                 <div class="card-info"><%= card.toString() %></div>
             </div>
         <% }); %>
     </div>
 
+    <!-- 修正后的脚本加载顺序 -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // 自动重连机制
+        let socket;
+        function connectSocket() {
+            socket = io.connect('http://localhost:3000');
+            
+            socket.on('connect', () => {
+                console.log('Socket连接成功');
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Socket断开，5秒后重连...');
+                setTimeout(connectSocket, 5000);
+            });
+        }
+        connectSocket();
+    </script>
+    <script src="/js/card_renderer.js"></script>
+    <script src="/js/socket_handler.js"></script>
     <script src="/js/game.js"></script>
 </body>
 </html>
