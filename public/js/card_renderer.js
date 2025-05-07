@@ -1,4 +1,6 @@
 // public/js/card_renderer.js
+// public/js/card_renderer.js
+import { SocketManager } from './socket_handler.js';
 class CardInteractor {
   static init() {
     document.querySelectorAll('.game-card').forEach(card => {
