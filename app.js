@@ -12,10 +12,25 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+<<<<<<< HEAD
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
+=======
+// 安全扫描函数
+const securityCheck = () => {
+  // This function is intentionally left blank for now.
+};
+
+// 安全头配置
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'none'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'"],
+>>>>>>> 066a9a418fb9b63bba0e4cc4ae50a322cfe6582f
       imgSrc: ["'self'", "data:"],
       connectSrc: ["'self'"]
     }
@@ -59,16 +74,27 @@ class Card {
 
 // 路由
 app.get('/', (req, res) => {
+<<<<<<< HEAD
   const cards = [
     '10_of_clubs.png', 'ace_of_spades.png',
     'king_of_diamonds.png', 'queen_of_hearts.png'
   ].map(f => new Card(f));
+=======
+  try {
+//    securityCheck(); // 每次请求执行安全扫描
+    
+    const cards = [
+      '10_of_clubs.png', 'ace_of_spades.png',
+      'king_of_diamonds.png', 'queen_of_hearts.png'
+    ].map(f => new Card(f));
+>>>>>>> 066a9a418fb9b63bba0e4cc4ae50a322cfe6582f
 
   res.render('index', { cards });
 });
 
 // Socket.IO
 io.on('connection', (socket) => {
+<<<<<<< HEAD
   console.log('new connection', socket.id);
 
   socket.on('game-start', (data) => {
@@ -90,6 +116,10 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('disconnect', socket.id);
   });
+=======
+  console.log("new connection")
+  socket.on('disconnect', () => {});
+>>>>>>> 066a9a418fb9b63bba0e4cc4ae50a322cfe6582f
 });
 
 // 启动服务
