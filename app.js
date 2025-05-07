@@ -90,9 +90,10 @@ class Deck {
 // Routes
 app.get('/', (req, res) => {
     const cards = [
- '10_of_clubs', 'ace_of_spades',
- 'king_of_diamonds', 'queen_of_hearts'
+        '10_of_clubs', 'ace_of_spades',
+        'king_of_diamonds', 'queen_of_hearts'
     ].map(f => {
+        const [rank, suit] = f.replace('.png', '').split('_of_');
         return new Card(rank, suit);
     });
     res.render('index', { cards });
@@ -149,8 +150,8 @@ io.on('connection', (socket) => {
         if (room.ready.length === 4) {
             io.to(roomId).emit('game-start');
             const deck = new Deck();
-            const players = room.players;
-            for(let i=0;i<52;i++){
+            const players = room.players;            
+             let count = 0;
                 const card = deck.cards[i];
                 card.setOwner(players[count]);
                 count++;
@@ -163,22 +164,6 @@ io.on('connection', (socket) => {
                 io.to(roomId).emit('card:deal', hand);
             }
             console.log('game start');
-            io.to(roomId).emit('game-start');
-            const deck = new Deck();
-            const players = room.players;
-            let count = 0;
-            for(let i=0;i<52;i++){
-                const card = deck.cards[i];
-                card.setOwner(players[count]);
-                count++;
-                if(count === 4){
-                    count = 0;
-                }
-            }
-            for(let i=0;i<players.length;i++){
-                const hand = deck.cards.filter(c=>c.owner === players[i]).map(c=>{return {rank:c.rank,suit:c.suit}});
-                io.to(roomId).emit('card:deal', hand);
-            }
 
             room.ready = [];
 
