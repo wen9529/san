@@ -150,7 +150,8 @@ io.on('connection', (socket) => {
         if (room.ready.length === 4) {
             io.to(roomId).emit('game-start');
             const deck = new Deck();
-            const players = room.players;            
+            const players = room.players;
+            for(let i=0;i<deck.cards.length;i++){            
              let count = 0;
                 const card = deck.cards[i];
                 card.setOwner(players[count]);
