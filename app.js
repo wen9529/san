@@ -43,9 +43,7 @@ class Card {
     };
 
     constructor(rank, suit) {
-
         this.suit = Card.SUITS[suit] || '';
-        this.rank = rank;
 
         this.rank = this.#parseRank(rank);
     }
@@ -95,7 +93,10 @@ app.get('/', (req, res) => {
         '10_of_clubs.png', 'ace_of_spades.png',
         'king_of_diamonds.png', 'queen_of_hearts.png'
     ].map(f => new Card(f));
-
+    ].map(f => {
+        const [rank, suit] = f.replace('.png', '').split('_of_');
+        return new Card(rank, suit);
+    });
     res.render('index', { cards });
 });
 
@@ -104,6 +105,7 @@ const rooms = {};
 for (let i = 1; i <= 4; i++) {
     rooms[i] = { players: [], ready: [] };
 }
+
 // Socket.IO
 io.on('connection', (socket) => {
     console.log('new connection', socket.id);
@@ -130,6 +132,7 @@ io.on('connection', (socket) => {
             return;
         }
         room.players.push(playerId);
+        room.players.push(playerId);
         socket.join(roomId);
         io.to(roomId).emit('new-player', playerId);
         io.emit('room-update', rooms);
@@ -142,8 +145,28 @@ io.on('connection', (socket) => {
             console.error('Player not in room:', playerId, roomId);
             return;
         }
-        room.ready.push(playerId);
+        if(!room.ready.includes(playerId)){
+             room.ready.push(playerId);
+        }
+       
         if (room.ready.length === 4) {
+            io.to(roomId).emit('game-start');
+            const deck = new Deck();
+            const players = room.players;
+            let count = 0;
+            for(let i=0;i<52;i++){
+                const card = deck.cards[i];
+                card.setOwner(players[count]);
+                count++;
+                if(count === 4){
+                    count = 0;
+                }
+            }
+            for(let i=0;i<players.length;i++){
+                const hand = deck.cards.filter(c=>c.owner === players[i]).map(c=>{return {rank:c.rank,suit:c.suit}});
+                io.to(roomId).emit('card:deal', hand);
+            }
+            console.log('game start');
             io.to(roomId).emit('game-start');
             const deck = new Deck();
             const players = room.players;
@@ -172,12 +195,6 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('disconnect', socket.playerId, socket.id);
-    });
-
-    socket.on('card:play', data => {
-        data.playerId = socket.playerId;
-        console.log('card:play', socket.playerId, data);
-        io.to(data.roomId).emit('card:update', data);
     });
 });
 
