@@ -36,5 +36,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   }
-}
 SocketManager.init();
