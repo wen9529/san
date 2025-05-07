@@ -1,5 +1,4 @@
 // public/js/socket_handler.js
-document.addEventListener('DOMContentLoaded', () => {
   class SocketManager {
     static init() {
       this.socket = io();
@@ -35,6 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
-  SocketManager.init();
+SocketManager.init();
+document.addEventListener('DOMContentLoaded', () => {
 });
-export {SocketManager};
