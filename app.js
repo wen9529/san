@@ -12,34 +12,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// 安全扫描函数
-const securityCheck = () => {
-  const publicDir = path.join(__dirname, 'public');
-  const checkFiles = ['js', 'css'].flatMap(dir => 
-    fs.readdirSync(path.join(publicDir, dir))
-      .filter(file => file.endsWith('.js') || file.endsWith('.css'))
-  );
-
-  checkFiles.forEach(file => {
-    const fullPath = path.join(publicDir, file.includes('js') ? 'js' : 'css', file);
-    const content = fs.readFileSync(fullPath, 'utf8');
-    if (content.includes('stadium')) {
-      throw new Error(`恶意文件检测: ${file}`);
-    }
-  });
-};
-
-// 安全头配置
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'none'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      defaultSrc: ["'self'"],
       imgSrc: ["'self'", "data:"],
       connectSrc: ["'self'"]
     }
-  },
+  }
   crossOriginEmbedderPolicy: false
 }));
 
@@ -79,28 +59,42 @@ class Card {
 
 // 路由
 app.get('/', (req, res) => {
-  try {
-    securityCheck(); // 每次请求执行安全扫描
-    
-    const cards = [
-      '10_of_clubs.png', 'ace_of_spades.png',
-      'king_of_diamonds.png', 'queen_of_hearts.png'
-    ].map(f => new Card(f));
+  const cards = [
+    '10_of_clubs.png', 'ace_of_spades.png',
+    'king_of_diamonds.png', 'queen_of_hearts.png'
+  ].map(f => new Card(f));
 
-    res.render('index', { cards });
-  } catch (err) {
-    console.error('安全拦截:', err);
-    res.status(500).send('系统安全检测异常');
-  }
+  res.render('index', { cards });
 });
 
 // Socket.IO
 io.on('connection', (socket) => {
-  socket.on('disconnect', () => {});
+  console.log('new connection', socket.id);
+
+  socket.on('game-start', (data) => {
+    console.log('game-start', socket.id, data);
+  });
+
+  socket.on('player-move', (data) => {
+    console.log('player-move', socket.id, data);
+  });
+
+  socket.on('player-join', (data) => {
+    console.log('player-join', socket.id, data);
+  });
+
+  socket.on('disconnecting', () => {
+    console.log('disconnecting', socket.id);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('disconnect', socket.id);
+  });
 });
 
 // 启动服务
 server.listen(3000, '127.0.0.1', () => {
+  console.log('server started');
   console.log(`
   ==========================
   安全服务已启动

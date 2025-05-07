@@ -51,6 +51,59 @@ body {
   transform: translateY(-5px) rotate(2deg);
 }
 
+/* public/css/style.css */
+:root {
+  --card-width: 140px;
+  --card-height: 190px;
+}
+
+body {
+  background: #2a6e3d;
+  color: #fff;
+  font-family: 'Microsoft YaHei', sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+#connection-status {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  padding: 8px 15px;
+  border-radius: 5px;
+  background: rgba(0,0,0,0.7);
+}
+
+.connected { color: #00ff88; }
+.disconnected { color: #ff4444; }
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
+  gap: 15px;
+  justify-content: center;
+}
+
+.game-card {
+  width: var(--card-width);
+  height: var(--card-height);
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-5px) rotate(2deg);
+}
+
 .game-card.played {
   filter: grayscale(80%);
   cursor: not-allowed;
