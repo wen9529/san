@@ -12,6 +12,30 @@
         <!-- 游戏状态将显示在这里 -->
     </div>
 
+    <div id="room-list">
+        <div class="room" id="room-1" data-room-id="1">
+            <h2>房间 1</h2>
+            <p>人数: 0/4</p>
+            <button class="join-button">加入</button>
+        </div>
+        <div class="room" id="room-2" data-room-id="2">
+            <h2>房间 2</h2>
+            <p>人数: 0/4</p>
+            <button class="join-button">加入</button>
+        </div>
+        <div class="room" id="room-3" data-room-id="3">
+            <h2>房间 3</h2>
+            <p>人数: 0/4</p>
+            <button class="join-button">加入</button>
+        </div>
+        <div class="room" id="room-4" data-room-id="4">
+            <h2>房间 4</h2>
+            <p>人数: 0/4</p>
+            <button class="join-button">加入</button>
+        </div>
+    </div>
+    <button id='ready-button' style="display: none">准备</button>
+    <div id='game-area' style="display: none">
     <div id="card-container"></div>
     </div>
     <script src="/socket.io/socket.io.js"></script>

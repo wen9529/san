@@ -68,6 +68,11 @@ app.get('/', (req, res) => {
     res.render('index', { cards });
 });
 
+// Room management
+const rooms = {};
+for (let i = 1; i <= 4; i++) {
+    rooms[i] = { players: [], ready: [] };
+}
 // Socket.IO
 io.on('connection', (socket) => {
     console.log('new connection', socket.id);
@@ -75,6 +80,38 @@ io.on('connection', (socket) => {
     socket.on('player-id', (playerId) => {
         socket.playerId = playerId;
         console.log('player-id', socket.playerId, socket.id);
+    });
+
+    socket.on('join-room', (roomId, playerId) => {
+        console.log('join-room', roomId, playerId);
+        if (!rooms[roomId]) {
+            console.error('Room not found:', roomId);
+            return;
+        }
+
+        const room = rooms[roomId];
+        if (room.players.length >= 4) {
+            console.log('Room full:', roomId);
+            return;
+        }
+        room.players.push(playerId);
+        socket.join(roomId);
+        io.to(roomId).emit('new-player', playerId);
+        io.emit('room-update', rooms);
+    });
+
+    socket.on('ready', (roomId, playerId) => {
+        console.log('ready', roomId, playerId);
+        const room = rooms[roomId];
+        if (!room || !room.players.includes(playerId)) {
+            console.error('Player not in room:', playerId, roomId);
+            return;
+        }
+        room.ready.push(playerId);
+        if (room.ready.length === 4) {
+            io.to(roomId).emit('game-start');
+            room.ready = [];
+        }
     });
 
     socket.on('game-start', (data) => {

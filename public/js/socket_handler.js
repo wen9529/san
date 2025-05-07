@@ -1,8 +1,9 @@
 // public/js/socket_handler.js
-  class SocketManager {
+class SocketManager {
     static init() {
- this.playerId = this.generatePlayerId();
       this.socket = io();
+ this.playerId = this.generatePlayerId();
+ this.roomId = null;
 
       this.socket.on('connect', () => {
         document.getElementById('connection-status').className = 'connected';
@@ -10,7 +11,7 @@
         document.getElementById('connection-status').textContent = '🟢 已连接';
       });
  this.socket.emit('player-id', this.playerId);
-
+ 
       this.socket.on('disconnect', () => {
         document.getElementById('connection-status').className = 'disconnected';
         document.getElementById('connection-status').textContent = '🔴 断开连接';
