@@ -2,11 +2,10 @@
 class SocketManager {
     static init() {
         this.socket = io();
-      this.socket = io();
- this.playerId = this.generatePlayerId();
- this.roomId = null;
+        this.playerId = this.generatePlayerId();
+        this.roomId = null;
 
-      this.socket.on('connect', () => {
+        this.socket.on('connect', () => {
         document.getElementById('connection-status').className = 'connected';
         console.log('Connected to server', this.socket.id);
         document.getElementById('connection-status').textContent = '🟢 已连接';
@@ -19,8 +18,7 @@ class SocketManager {
         document.getElementById('connection-status').textContent = '🔴 断开连接';
         setTimeout(() => SocketManager.init(), 5000);
       });
-
-      // 添加其他事件处理器
+      
         this.socket.on('room-update', (rooms) => {
             console.log('Received room-update:', rooms);
             this.updateRoomDisplay(rooms);
@@ -38,21 +36,6 @@ class SocketManager {
         });
 
       this.setupRoomJoinButtons();
-      this.setupReadyButton();
-
-        // 添加其他事件处理器
-        this.socket.on('game-start', data => {
-          console.log('game-start', data);
-        });
-
-        this.socket.on('player-move', data => {
-          console.log('player-move', data);
-        });
-
-        this.socket.on('player-join', data => {
-          console.log('player-join', data);
-        });
-
         this.socket.on('card:update', data => {
           const event = new CustomEvent('card:update', { detail: data });
           document.dispatchEvent(event);
@@ -92,44 +75,20 @@ class SocketManager {
 
           });
         });
-      });
+      }
 
-      this.socket.on('player-move', data => {
-        console.log('player-move', data);
-      });
-
-      this.socket.on('player-join', data => {
-        console.log('player-join', data);
-      });
-
-      this.socket.on('card:update', data => {
-        const event = new CustomEvent('card:update', { detail: data });
-        document.dispatchEvent(event);
+    static setupReadyButton() {
+      const readyButton = document.getElementById('ready-button');
+      readyButton.addEventListener('click', () => {
+        console.log('Ready button clicked', this.playerId, this.roomId);
+        this.socket.emit('ready', this.roomId, this.playerId);
+        readyButton.disabled = true;
 
       });
+    }
+    static generatePlayerId() {
+      return Math.random().toString(36).substring(2, 9);
     }
   }
-
- static generatePlayerId() {
- return Math.random().toString(36).substring(2, 9);
-      static setupReadyButton() {
-        const readyButton = document.getElementById('ready-button');
-        readyButton.addEventListener('click', () => {
- }
-
 SocketManager.init();
-document.addEventListener('DOMContentLoaded', () => {
-          console.log('Ready button clicked', this.playerId, this.roomId);
-          this.socket.emit('ready', this.roomId, this.playerId);
-          readyButton.disabled = true;
-
-        });
-      }
-
-      static generatePlayerId() {
-        return Math.random().toString(36).substring(2, 9);
-      }
-    }
-
-    SocketManager.init();
     export { SocketManager };
