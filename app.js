@@ -94,6 +94,10 @@ io.on('connection', (socket) => {
             console.log('Room full:', roomId);
             return;
         }
+        if (room.players.includes(playerId)){
+            console.log('Player already in room:', playerId, roomId);
+            return;
+        }
         room.players.push(playerId);
         socket.join(roomId);
         io.to(roomId).emit('new-player', playerId);
