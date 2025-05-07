@@ -1,6 +1,6 @@
 // public/js/socket_handler.js
 document.addEventListener('DOMContentLoaded', () => {
-  export class SocketManager {
+  class SocketManager {
     static init() {
       this.socket = io();
 
