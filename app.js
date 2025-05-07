@@ -11,18 +11,18 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // Security Headers
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'"],
-            styleSrc: ["'self'"],
-            imgSrc: ["'self'", "data:"],
-            connectSrc: ["'self'"]
-        }
-    },
-    crossOriginEmbedderPolicy: false
-}));
+// app.use(helmet({
+//     contentSecurityPolicy: {
+//         directives: {
+//             defaultSrc: ["'self'"],
+//             scriptSrc: ["'self'"],
+//             styleSrc: ["'self'"],
+//             imgSrc: ["'self'", "data:"],
+//             connectSrc: ["'self'"]
+//         }
+//     },
+//     crossOriginEmbedderPolicy: false
+// }));
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public'), {
