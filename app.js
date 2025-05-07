@@ -42,9 +42,11 @@ class Card {
         clubs: '♣', spades: '♠', diamonds: '♦', hearts: '♥'
     };
 
-    constructor(filename) {
-        const [rank, suit] = filename.replace('.png', '').split('_of_');
+    constructor(rank, suit) {
+
         this.suit = Card.SUITS[suit] || '';
+        this.rank = rank;
+
         this.rank = this.#parseRank(rank);
     }
 
@@ -55,6 +57,35 @@ class Card {
 
     get imagePath() {
         return `/images/${this.rank}_of_${this.suit}.png`;
+    }
+
+    setOwner(playerId) {
+        this.owner = playerId;
+    }
+}
+
+class Deck {
+    constructor() {
+        this.cards = [];
+        this.createDeck();
+        this.shuffle();
+    }
+
+    createDeck() {
+        const ranks = ['3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace', '2'];
+        const suits = ['clubs', 'spades', 'diamonds', 'hearts'];
+        for (const suit of suits) {
+            for (const rank of ranks) {
+                this.cards.push(new Card(rank, suit));
+            }
+        }
+    }
+
+    shuffle() {
+        for (let i = this.cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+        }
     }
 }
 
@@ -114,20 +145,25 @@ io.on('connection', (socket) => {
         room.ready.push(playerId);
         if (room.ready.length === 4) {
             io.to(roomId).emit('game-start');
+            const deck = new Deck();
+            const players = room.players;
+            let count = 0;
+            for(let i=0;i<52;i++){
+                const card = deck.cards[i];
+                card.setOwner(players[count]);
+                count++;
+                if(count === 4){
+                    count = 0;
+                }
+            }
+            for(let i=0;i<players.length;i++){
+                const hand = deck.cards.filter(c=>c.owner === players[i]).map(c=>{return {rank:c.rank,suit:c.suit}});
+                io.to(roomId).emit('card:deal', hand);
+            }
+
             room.ready = [];
+
         }
-    });
-
-    socket.on('game-start', (data) => {
-        console.log('game-start', socket.playerId, socket.id, data);
-    });
-
-    socket.on('player-move', (data) => {
-        console.log('player-move', socket.playerId, socket.id, data);
-    });
-
-    socket.on('player-join', (data) => {
-        console.log('player-join', socket.playerId, socket.id, data);
     });
 
     socket.on('disconnecting', () => {
@@ -136,6 +172,12 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('disconnect', socket.playerId, socket.id);
+    });
+
+    socket.on('card:play', data => {
+        data.playerId = socket.playerId;
+        console.log('card:play', socket.playerId, data);
+        io.to(data.roomId).emit('card:update', data);
     });
 });
 
