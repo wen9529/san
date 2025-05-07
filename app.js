@@ -4,6 +4,8 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const helmet = require('helmet');
+// 这些模块在最终版本中未使用，可以考虑移除如果确定不再需要
+// const crypto = require('crypto');
 const crypto = require('crypto');
 const fs = require('fs');
 
@@ -13,24 +15,13 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 <<<<<<< HEAD
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-=======
-// 安全扫描函数
-const securityCheck = () => {
-  // This function is intentionally left blank for now.
-};
-
 // 安全头配置
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'none'"],
+      defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'"],
->>>>>>> 066a9a418fb9b63bba0e4cc4ae50a322cfe6582f
       imgSrc: ["'self'", "data:"],
       connectSrc: ["'self'"]
     }
@@ -74,20 +65,10 @@ class Card {
 
 // 路由
 app.get('/', (req, res) => {
-<<<<<<< HEAD
   const cards = [
     '10_of_clubs.png', 'ace_of_spades.png',
     'king_of_diamonds.png', 'queen_of_hearts.png'
   ].map(f => new Card(f));
-=======
-  try {
-//    securityCheck(); // 每次请求执行安全扫描
-    
-    const cards = [
-      '10_of_clubs.png', 'ace_of_spades.png',
-      'king_of_diamonds.png', 'queen_of_hearts.png'
-    ].map(f => new Card(f));
->>>>>>> 066a9a418fb9b63bba0e4cc4ae50a322cfe6582f
 
   res.render('index', { cards });
 });
@@ -95,7 +76,6 @@ app.get('/', (req, res) => {
 // Socket.IO
 io.on('connection', (socket) => {
 <<<<<<< HEAD
-  console.log('new connection', socket.id);
 
   socket.on('game-start', (data) => {
     console.log('game-start', socket.id, data);
@@ -115,11 +95,9 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('disconnect', socket.id);
-  });
 =======
-  console.log("new connection")
-  socket.on('disconnect', () => {});
->>>>>>> 066a9a418fb9b63bba0e4cc4ae50a322cfe6582f
+  console.log('new connection', socket.id);
+>>>>>>> main
 });
 
 // 启动服务
