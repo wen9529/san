@@ -1,6 +1,7 @@
 // public/js/socket_handler.js
   class SocketManager {
     static init() {
+ this.playerId = this.generatePlayerId();
       this.socket = io();
 
       this.socket.on('connect', () => {
@@ -8,6 +9,7 @@
         console.log('Connected to server', this.socket.id);
         document.getElementById('connection-status').textContent = '🟢 已连接';
       });
+ this.socket.emit('player-id', this.playerId);
 
       this.socket.on('disconnect', () => {
         document.getElementById('connection-status').className = 'disconnected';
@@ -34,6 +36,11 @@
       });
     }
   }
+
+ static generatePlayerId() {
+ return Math.random().toString(36).substring(2, 9);
+ }
+
 SocketManager.init();
 document.addEventListener('DOMContentLoaded', () => {
 });

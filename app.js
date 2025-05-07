@@ -72,24 +72,29 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
     console.log('new connection', socket.id);
 
+    socket.on('player-id', (playerId) => {
+        socket.playerId = playerId;
+        console.log('player-id', socket.playerId, socket.id);
+    });
+
     socket.on('game-start', (data) => {
-        console.log('game-start', socket.id, data);
+        console.log('game-start', socket.playerId, socket.id, data);
     });
 
     socket.on('player-move', (data) => {
-        console.log('player-move', socket.id, data);
+        console.log('player-move', socket.playerId, socket.id, data);
     });
 
     socket.on('player-join', (data) => {
-        console.log('player-join', socket.id, data);
+        console.log('player-join', socket.playerId, socket.id, data);
     });
 
     socket.on('disconnecting', () => {
-        console.log('disconnecting', socket.id);
+        console.log('disconnecting', socket.playerId, socket.id);
     });
 
     socket.on('disconnect', () => {
-        console.log('disconnect', socket.id);
+        console.log('disconnect', socket.playerId, socket.id);
     });
 });
 
