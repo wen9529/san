@@ -90,11 +90,9 @@ class Deck {
 // Routes
 app.get('/', (req, res) => {
     const cards = [
-        '10_of_clubs.png', 'ace_of_spades.png',
-        'king_of_diamonds.png', 'queen_of_hearts.png'
-    ].map(f => new Card(f));
+ '10_of_clubs', 'ace_of_spades',
+ 'king_of_diamonds', 'queen_of_hearts'
     ].map(f => {
-        const [rank, suit] = f.replace('.png', '').split('_of_');
         return new Card(rank, suit);
     });
     res.render('index', { cards });
@@ -132,7 +130,6 @@ io.on('connection', (socket) => {
             return;
         }
         room.players.push(playerId);
-        room.players.push(playerId);
         socket.join(roomId);
         io.to(roomId).emit('new-player', playerId);
         io.emit('room-update', rooms);
@@ -148,12 +145,11 @@ io.on('connection', (socket) => {
         if(!room.ready.includes(playerId)){
              room.ready.push(playerId);
         }
-       
+
         if (room.ready.length === 4) {
             io.to(roomId).emit('game-start');
             const deck = new Deck();
             const players = room.players;
-            let count = 0;
             for(let i=0;i<52;i++){
                 const card = deck.cards[i];
                 card.setOwner(players[count]);
