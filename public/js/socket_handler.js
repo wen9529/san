@@ -1,5 +1,7 @@
 // public/js/socket_handler.js
-class SocketManager {
+document.addEventListener('DOMContentLoaded', () => {
+
+  class SocketManager {
   static init() {
     this.socket = io();
     
@@ -32,6 +34,7 @@ class SocketManager {
       const event = new CustomEvent('card:update', { detail: data });
       document.dispatchEvent(event);
     });
+  }
   }
 }
 SocketManager.init();
