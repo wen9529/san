@@ -19,6 +19,7 @@ class CardRenderer {
   static init() {
     const renderer = new this(); // Create an instance to access instance properties
     document.addEventListener('card:deal', e => {
+ console.log('CardRenderer: Received custom card:deal event', e.detail);
       const cards = e.detail;
       renderer.renderCards(cards);
     });
@@ -31,8 +32,10 @@ class CardRenderer {
 
   static renderCards(cards) {
     const renderer = new this(); // Create an instance to access instance properties
+ console.log('CardRenderer: Starting to render cards');
     renderer.cardContainer.innerHTML = ''; // Clear previous cards
     cards.forEach(card => {
+ console.log('CardRenderer: Rendering card', card);
       const cardElement = document.createElement('div');
       cardElement.classList.add('game-card');
       cardElement.dataset.rank = card.rank;

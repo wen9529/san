@@ -12,12 +12,19 @@ class Game {
     // Initialize game event listeners
     static init() {
         SocketManager.socket.on('card:deal', data => {
+            console.log('Received card:deal event:', data); // Log received cards
             this.dealCards(data);
         });
 
         SocketManager.socket.on('card:update', data => {
             this.updateCardStatus(data);
         });
+
+        // Listen for dealt cards
+        SocketManager.socket.on('card:deal', data => {
+            this.dealCards(data);
+        });
+
 
         // Listen for updates to the current play
         SocketManager.socket.on('game:currentPlay', data => {
@@ -43,6 +50,7 @@ class Game {
 
     static dealCards(cards) {
         this.hand = cards;
+        console.log('Dispatching custom card:deal event with hand:', this.hand); // Log when dispatching
         console.log('dealed cards', this.hand);
         const event = new CustomEvent('card:deal', { detail: this.hand });
         document.dispatchEvent(event);
