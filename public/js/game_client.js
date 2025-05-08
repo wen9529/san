@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Function to handle receiving dealt cards from the server
-function handleDealCards(cardsData) {
+window.handleDealCards = function(cardsData) {
  console.log('Received dealt cards:', cardsData);
 
     // Get the container to display the cards

@@ -40,8 +40,9 @@ class CardRenderer {
       cardElement.classList.add('game-card');
       cardElement.dataset.rank = card.rank;
       cardElement.dataset.suit = card.suit;
-      // You might want to use images instead of text content later
-      cardElement.textContent = `${card.rank}${renderer.suits[card.suit.toLowerCase()]}`;
+      const imageUrl = `images/cards/${card.suit.toLowerCase()}_${card.rank.toUpperCase()}.png`;
+      cardElement.style.backgroundImage = `url(${imageUrl})`;
+      cardElement.style.backgroundSize = 'contain'; // Or 'cover' depending on your image aspect ratio
       cardElement.addEventListener('click', () => {
         renderer.toggleCardSelection(cardElement, card);
       });
@@ -58,8 +59,9 @@ class CardRenderer {
         cardElement.classList.add('game-card', 'played');
         cardElement.dataset.rank = card.rank;
         cardElement.dataset.suit = card.suit;
-        // You might want to use images instead of text content later
-        cardElement.textContent = `${card.rank}${renderer.suits[card.suit.toLowerCase()]}`;
+        const imageUrl = `images/cards/${card.suit.toLowerCase()}_${card.rank.toUpperCase()}.png`;
+        cardElement.style.backgroundImage = `url(${imageUrl})`;
+        cardElement.style.backgroundSize = 'contain'; // Or 'cover'
         renderer.playedCardsContainer.appendChild(cardElement);
       });
     }
