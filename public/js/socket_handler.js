@@ -22,6 +22,9 @@ class SocketManager {
         this.socket.on('room-update', (rooms) => {
             console.log('Received room-update:', rooms);
             this.updateRoomDisplay(rooms);
+            if (this.roomId && rooms[this.roomId] && rooms[this.roomId].players.length === 4) {
+                document.getElementById('ready-button').style.display = 'none';
+            }
         });
 
         this.socket.on('new-player', (playerId) => {
