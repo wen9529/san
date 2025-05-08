@@ -2,7 +2,6 @@
 // Assuming game_client.js is loaded before this script and provides a global `gameClient` object or functions.
 class SocketManager {
         this.socket = io();
- constructor() {
  this.socket = io();
  }
         this.playerId = this.generatePlayerId();
