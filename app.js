@@ -105,6 +105,28 @@ for (let i = 1; i <= 4; i++) {
     rooms[i] = { players: [], ready: [] };
 }
 
+function startGame(roomId) {
+    const room = rooms[roomId];
+    if (!room || room.players.length !== 4) {
+        console.error('Cannot start game in room', roomId, '. Incorrect number of players.');
+        return;
+    }
+
+    io.to(roomId).emit('game-start');
+    const deck = new Deck();
+    const players = room.players;
+    let playerIndex = 0;
+    for (const card of deck.cards) {
+        card.setOwner(players[playerIndex]);
+        playerIndex = (playerIndex + 1) % 4;
+    }
+    for (let i = 0; i < players.length; i++) {
+        const hand = deck.cards.filter(c => c.owner === players[i]).map(c => { return { rank: c.rank, suit: c.suit } });
+        io.to(players[i]).emit('card:deal', hand); // Emit hand to specific player
+    }
+    console.log('game start in room', roomId);
+}
+
 // Socket.IO
 io.on('connection', (socket) => {
     console.log('new connection', socket.id);
@@ -134,6 +156,19 @@ io.on('connection', (socket) => {
         socket.join(roomId);
         io.to(roomId).emit('new-player', playerId);
         io.emit('room-update', rooms);
+        if (room.ready.length === 4) {
+ if (room.ready.length === 4) { // Still allow ready if not auto-starting
+             let count = 0;
+                const card = deck.cards[i];
+                card.setOwner(players[count]);
+                count++;
+                if(count === 4){
+                    count = 0;
+                }
+            }
+            startGame(roomId);
+ room.ready = []; // Reset ready state after game start
+        }
     });
 
     socket.on('ready', (roomId, playerId) => {
@@ -143,22 +178,12 @@ io.on('connection', (socket) => {
             console.error('Player not in room:', playerId, roomId);
             return;
         }
-        if(!room.ready.includes(playerId)){
-             room.ready.push(playerId);
+        if (!room.ready.includes(playerId)) {
+            room.ready.push(playerId);
         }
 
-        if (room.ready.length === 4) {
-            io.to(roomId).emit('game-start');
-            const deck = new Deck();
-            const players = room.players;
-            for(let i=0;i<deck.cards.length;i++){            
-             let count = 0;
-                const card = deck.cards[i];
-                card.setOwner(players[count]);
-                count++;
-                if(count === 4){
-                    count = 0;
-                }
+        if (room.ready.length === 4 && room.players.length === 4) { // Only start game if room is full AND all are ready
+            startGame(roomId);
             }
             for(let i=0;i<players.length;i++){
                 const hand = deck.cards.filter(c=>c.owner === players[i]).map(c=>{return {rank:c.rank,suit:c.suit}});
@@ -167,8 +192,6 @@ io.on('connection', (socket) => {
             console.log('game start');
 
             room.ready = [];
-
-        }
     });
 
     socket.on('disconnecting', () => {
