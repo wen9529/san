@@ -2,9 +2,11 @@
 // Assuming game_client.js is loaded before this script and provides a global `gameClient` object or functions.
 class SocketManager {
         this.socket = io();
+ constructor() {
+ this.socket = io();
+ }
         this.playerId = this.generatePlayerId();
         this.roomId = null;
-
         this.socket.on('connect', () => {
         document.getElementById('connection-status').className = 'connected';
         console.log('Connected to server', this.socket.id);
