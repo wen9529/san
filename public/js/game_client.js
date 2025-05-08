@@ -13,6 +13,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // TODO: Initialize game elements and event listeners
 });
 
+// Function to handle receiving dealt cards from the server
+function handleDealCards(cardsData) {
+ console.log('Received dealt cards:', cardsData);
+
+    // Get the container to display the cards
+ const playerBottom = document.getElementById('player-bottom');
+
+ if (playerBottom) {
+ playerBottom.innerHTML = ''; // Clear any existing content
+        // For each card, create an element and append it to the container
+ cardsData.forEach(cardData => {
+ const cardElement = createCardElement(cardData); // createCardElement is assumed to be in card.js
+ playerBottom.appendChild(cardElement);
+ });
+ }
+}
+
 // Function to display player's hand
 function displayHand(cards) {
     // cards is expected to be an array of card objects

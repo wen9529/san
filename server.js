@@ -19,12 +19,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 io.on('connection', (socket) => {
   console.log('a user connected', socket.id);
 
-  // Temporary test code for card and deck
+  // Test code for card display (TEMPORARY)
   const deck = new Deck();
   deck.shuffle();
-  const sortedTestCards = sortCards(deck.cards.slice(0, 10)); // Sort the first 10 cards
-  console.log('Sorted test cards:', sortedTestCards);
+  socket.emit('deal_cards', deck.cards); // Send the shuffled deck to the connected client
 
+  // Temporary test code for card and deck - REMOVE LATER
   socket.on('disconnect', () => {
     console.log('user disconnected', socket.id);
   });

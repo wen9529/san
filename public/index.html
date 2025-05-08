@@ -5,10 +5,14 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Main game container -->
     <div id="game-container">
         <!-- 游戏内容将在这里渲染 -->
+        <div id="player-top" class="player-area"></div>
+        <div id="player-right" class="player-area"></div>
+        <div id="player-bottom" class="player-area"></div>
+        <div id="player-left" class="player-area"></div>
     </div>
-
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/socket_handler.js"></script>
     <script src="js/card.js"></script>
