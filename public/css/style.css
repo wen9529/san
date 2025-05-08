@@ -1,74 +1,32 @@
 /* public/css/style.css */
 :root {
+  --player-area-height: 150px; /* Adjusted player area height */
+  --player-area-width: 150px; /* Adjusted player area width */
   --card-width: 140px;
   --card-height: 190px;
+  --button-padding: 10px 20px;
+  --button-font-size: 16px;
+  --button-border-radius: 5px;
 }
+
+#connection-status {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 1000; /* Ensure it's on top */
+  padding: 8px 15px;
+  border-radius: 5px;
+  background: rgba(0,0,0,0.7);
+}
+
+.connected { color: #00ff88; }
+.disconnected { color: #ff4444; }
 
 body {
   background: #2a6e3d;
   color: #fff;
   font-family: 'Microsoft YaHei', sans-serif;
   margin: 0;
-  padding: 20px;
-}
-
-.game-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-#connection-status {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  padding: 8px 15px;
-  border-radius: 5px;
-  background: rgba(0,0,0,0.7);
-}
-
-.connected { color: #00ff88; }
-.disconnected { color: #ff4444; }
-
-.game-board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
-  gap: 15px;
-  justify-content: center;
-}
-
-.game-card:hover {
-  transform: translateY(-5px) rotate(2deg);
-}
-
-  background: #2a6e3d;
-  color: #fff;
-  font-family: 'Microsoft YaHei', sans-serif;
-  margin: 0;
-  padding: 20px;
-}
-
-.game-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-#connection-status {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  padding: 8px 15px;
-  border-radius: 5px;
-  background: rgba(0,0,0,0.7);
-}
-
-.connected { color: #00ff88; }
-.disconnected { color: #ff4444; }
-
-.game-board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
-  gap: 15px;
-  justify-content: center;
 }
 
 /* Basic card styles */
@@ -76,11 +34,17 @@ body {
   width: var(--card-width);
   height: var(--card-height);
   position: relative;
-  border-radius: 8px; /* Adjusted border-radius */
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
   transition: transform 0.2s ease;
   cursor: pointer;
+}
+
+/* Selected card style */
+.game-card.selected {
+  border: 2px solid gold;
+  box-shadow: 0 0 10px gold;
 }
 
 .game-card:hover {
@@ -92,10 +56,97 @@ body {
   cursor: not-allowed;
 }
 
+/* Room list container styles */
+#room-list-container { /* Changed ID to be more specific */
+ display: flex;
+  flex-direction: column;
+  align-items: center; /* Center items horizontally */
+  gap: 15px; /* Space between room items and create room section */
+  margin-top: 50px; /* Space above the room list */
+}
+
+/* Individual room item styles */
+.room {
+  background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white background */
+  border-radius: 8px;
+  padding: 15px 20px; /* Adjusted padding */
+  width: 90%; /* Adjusted width */
+  max-width: 500px; /* Adjusted max width */
+  display: flex; /* Use flexbox for content layout */
+  justify-content: space-between; /* Space out room info and join button */
+  align-items: center; /* Vertically align items */
+}
+
+.room h3 {
+  margin: 0; /* Remove default margin */
+  font-size: 1.2em; /* Use relative unit */
+}
+
+.room p {
+  margin: 0; /* Remove default margin */
+  font-size: 14px;
+}
+
 .game-card img {
+  display: block; /* Remove extra space below image */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Create room form/button styles */
+#create-room-container {
+ display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#create-room-container input[type="text"] {
+  padding: var(--button-padding);
   width: 100%; /* Ensure image covers the card */
   height: 100%; /* Ensure image covers the card */
   object-fit: cover;
+}
+
+/* Button container styles */
+.button-container {
+  display: flex;
+  justify-content: center; /* Center buttons horizontally */
+  gap: 10px; /* Space between buttons */
+  margin-top: 20px; /* Space above the buttons */
+}
+
+/* Button styles */
+.control-button {
+  padding: var(--button-padding);
+  font-size: var(--button-font-size);
+  cursor: pointer;
+  border: none;
+  border-radius: var(--button-border-radius);
+  background-color: #007bff; /* Example background color */
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+/* Button hover and active effects */
+.control-button:hover {
+  background-color: #0056b3; /* Example hover effect */
+}
+
+.control-button:active {
+  background-color: #004085; /* Example active effect */
+}
+
+/* Button disabled state */
+.control-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.join-button { /* Specific style for join button */
+  background-color: #cccccc; /* Example disabled color */
+  cursor: not-allowed;
 }
 
 .game-rules {
@@ -123,45 +174,121 @@ body {
   font-weight: bold;
 }
 
+#card-container { /* Hand area */
+  /* position: absolute; /* Consider if absolute positioning is needed within player area */
+  display: flex; /* Arrange cards in a row */
+  justify-content: center; /* Center cards horizontally */
+  align-items: flex-start; /* Align cards to the top of the container */
+  padding: 10px;
+  gap: -50px;
+  width: 100%; /* Ensure it takes full width of parent */
+  height: 100%; /* Ensure it takes full height of parent */
+  overflow-x: auto; /* Add scroll if hand is too wide */
+}
+
+#played-cards-container { /* Played cards area */
+  /* position: absolute; /* Consider if absolute positioning is needed within game container center */
+  display: flex; /* Arrange played cards */
+  justify-content: center; /* Center played cards */
+  align-items: center; /* Vertically center played cards */
+  min-height: 120px; /* Ensure visible area for played cards */
+  padding: 10px;
+}
+
 #game-container {
-    position: relative; /* Needed for absolute positioning of player divs */
-    width: 100%;
-    height: 80vh; /* Adjust height as needed to see the layout */
-    border: 1px solid blue; /* Border for visibility of game container */
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: grid; /* Use grid for main layout */
+  grid-template-areas:
+    "top-left top top-right"
+    "left center right"
+    "bottom-left bottom bottom-right";
+  grid-template-rows: var(--player-area-height) 1fr var(--player-area-height); /* Rows for top/bottom player areas and center */
+  grid-template-columns: var(--player-area-width) 1fr var(--player-area-width); /* Columns for left/right player areas and center */
 }
 
 #player-top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100px; /* Adjust height as needed */
-    border: 2px solid red; /* For visibility */
+  grid-area: top;
+  /* Remove borders for clean look */
+  border: 2px solid red; /* For visibility */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Hide overflowing content */
 }
 
 #player-right {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 100px; /* Adjust width as needed */
-    border: 2px solid green; /* For visibility */
-}
-
-#player-bottom {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100px; /* Adjust height as needed */
-    border: 2px solid yellow; /* For visibility */
+  grid-area: right;
+  /* Remove borders for clean look */
+  border: 2px solid green; /* For visibility */
+  display: flex;
+  flex-direction: column; /* Stack content vertically */
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Hide overflowing content */
 }
 
 #player-left {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 100px; /* Adjust width as needed */
-    border: 2px solid purple; /* For visibility */
+  grid-area: left;
+  /* Remove borders for clean look */
+  border: 2px solid purple; /* For visibility */
+  display: flex;
+  flex-direction: column; /* Stack content vertically */
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Hide overflowing content */
 }
+
+#player-bottom {
+  grid-area: bottom;
+  /* Remove borders for clean look */
+  border: 2px solid yellow; /* For visibility */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Hide overflowing content */
+}
+
+#player-top-left { grid-area: top-left; } /* Placeholder for corner */
+#player-top-right { grid-area: top-right; } /* Placeholder for corner */
+#player-bottom-left { grid-area: bottom-left; } /* Placeholder for corner */
+#player-bottom-right { grid-area: bottom-right; } /* Placeholder for corner */
+
+#game-area { /* Assuming this is your main game area in the center */
+  grid-area: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Game state display styles */
+#game-state-display {
+  text-align: center;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #fff; /* Example color */
+}
+
+/* Styles for game info section (rules and gameplay) */
+#game-info {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  color: #fff;
+}
+
+#game-info h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #00ff88;
+}
+
+#game-info ul {
+  list-style-type: disc;
+  margin-left: 20px;
+}
+
+

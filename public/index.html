@@ -5,6 +5,8 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div id="game-status"></div> <!-- Added game status element -->
+
     <!-- Main game container -->
     <div id="game-container">
         <!-- 游戏内容将在这里渲染 -->
@@ -13,10 +15,21 @@
         <div id="player-bottom" class="player-area"></div>
         <div id="player-left" class="player-area"></div>
     </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/socket_handler.js"></script>
-    <script src="js/card.js"></script>
-    <script src="js/game_client.js"></script>
+
+    <div id="game-controls">
+        <button id="play-card-button">出牌</button>
+        <button id="pass-button">过牌</button>
+        <button id="ready-button">准备</button>
+    </div>
+
+    <div id="room-lobby">
+        <h2>房间列表</h2>
+        <div id="room-list">
+            <!-- Room items with join buttons will be added here by JavaScript -->
+        </div>
+        <h3>创建新房间</h3>
+        <button id="create-room-button">创建房间</button>
+    </div>
 
     <div id="game-info">
         <h3>有效牌型：</h3>
@@ -24,22 +37,13 @@
             <li><strong>单张 (Single):</strong> 任何一张牌。</li>
             <li><strong>对子 (Pair):</strong> 两张点数相同的牌。</li>
             <li><strong>三张 (Triple):</strong> 三张点数相同的牌。</li>
-            <li><strong>顺子 (Straight):</strong> 五张点数连续的牌 (例如：3-4-5-6-7, 10-J-Q-K-A)。A-2-3-4-5 也是顺子。</li>
-            <li><strong>同花 (Flush):</strong> 五张花色相同的牌，点数不连续。</li>
-            <li><strong>葫芦 (Full House):</strong> 三张点数相同的牌加两张点数相同的牌 (例如：三个8带一对5)。</li>
-            <li><strong>四带一 (Four of a Kind):</strong> 四张点数相同的牌带一张任意牌。</li>
-            <li><strong>同花顺 (Straight Flush):</strong> 五张花色相同且点数连续的牌。</li>
-        </ul>
-
-        <h3>游戏玩法：</h3>
-        <ul>
-            <li>第一轮出牌的玩家必须出含有黑桃3的任意有效牌型。</li>
-            <li>后续出牌必须比上一手牌大，且牌型相同 (单张对单张，对子对对子等)，除非出炸弹或更大的牌型。</li>
-            <li>玩家可以选择“过”，放弃本次出牌机会。</li>
-            <li>当一轮中除最后出牌玩家外所有人都“过”时，最后出牌玩家可以开始新的一轮，出任意牌型。</li>
         </ul>
     </section>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/socket_handler.js"></script>
+    <script src="js/card.js"></script>
 </body>
 </html>
+    <script src="js/game_client.js"></script>
