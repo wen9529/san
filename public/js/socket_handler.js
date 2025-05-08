@@ -2,9 +2,7 @@
 // Assuming game_client.js is loaded before this script and provides a global `gameClient` object or functions.
 class SocketManager {
         this.socket = io();
- this.socket = io();
- }
-        this.playerId = this.generatePlayerId();
+ constructor() {
         this.roomId = null;
         this.socket.on('connect', () => {
         document.getElementById('connection-status').className = 'connected';
@@ -17,6 +15,8 @@ class SocketManager {
         document.getElementById('connection-status').textContent = '🔴 断开连接';
         setTimeout(() => SocketManager.init(), 5000);
       });
+ this.socket = io();
+ this.playerId = this.generatePlayerId();
 
         // Listen for the 'deal_cards' event from the server
         this.socket.on('deal_cards', (cardsData) => {
