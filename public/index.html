@@ -1,43 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>锄大地游戏</title>
+    <title>十三水游戏</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="connection-status"></div>
-    <h1>锄大地游戏</h1>
-
-    <div id="game-status">
-        <!-- 游戏状态将显示在这里 -->
+    <div id="game-container">
+        <!-- 游戏内容将在这里渲染 -->
     </div>
 
-    <div id="room-list">
-        <div class="room" id="room-1" data-room-id="1">
-            <h2>房间 1</h2>
-            <p>人数: 0/4</p>
-            <button class="join-button">加入</button>
-        </div>
-        <div class="room" id="room-2" data-room-id="2">
-            <h2>房间 2</h2>
-            <p>人数: 0/4</p>
-            <button class="join-button">加入</button>
-        </div>
-        <div class="room" id="room-3" data-room-id="3">
-            <h2>房间 3</h2>
-            <p>人数: 0/4</p>
-            <button class="join-button">加入</button>
-        </div>
-        <div class="room" id="room-4" data-room-id="4">
-            <h2>房间 4</h2>
-            <p>人数: 0/4</p>
-            <button class="join-button">加入</button>
-        </div>
-    </div>
-    <button id='ready-button' style="display: none">准备</button>
-    <div id='game-area' style="display: none">
-    <div id="card-container"></div>
-    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/socket_handler.js"></script>
+    <script src="js/card.js"></script>
+    <script src="js/game_client.js"></script>
+</body>
+</html>
+        <h3>有效牌型：</h3>
+        <ul>
+            <li><strong>单张 (Single):</strong> 任何一张牌。</li>
+            <li><strong>对子 (Pair):</strong> 两张点数相同的牌。</li>
+            <li><strong>三张 (Triple):</strong> 三张点数相同的牌。</li>
+            <li><strong>顺子 (Straight):</strong> 五张点数连续的牌 (例如：3-4-5-6-7, 10-J-Q-K-A)。A-2-3-4-5 也是顺子。</li>
+            <li><strong>同花 (Flush):</strong> 五张花色相同的牌，点数不连续。</li>
+            <li><strong>葫芦 (Full House):</strong> 三张点数相同的牌加两张点数相同的牌 (例如：三个8带一对5)。</li>
+            <li><strong>四带一 (Four of a Kind):</strong> 四张点数相同的牌带一张任意牌。</li>
+            <li><strong>同花顺 (Straight Flush):</strong> 五张花色相同且点数连续的牌。</li>
+        </ul>
+
+        <h3>游戏玩法：</h3>
+        <ul>
+            <li>第一轮出牌的玩家必须出含有黑桃3的任意有效牌型。</li>
+            <li>后续出牌必须比上一手牌大，且牌型相同 (单张对单张，对子对对子等)，除非出炸弹或更大的牌型。</li>
+            <li>玩家可以选择“过”，放弃本次出牌机会。</li>
+            <li>当一轮中除最后出牌玩家外所有人都“过”时，最后出牌玩家可以开始新的一轮，出任意牌型。</li>
+        </ul>
+    </section>
     <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="js/card_renderer.js"></script>
     <script type="module" src="js/socket_handler.js"></script>

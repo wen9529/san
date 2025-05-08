@@ -1,6 +1,5 @@
 // public/js/socket_handler.js
 class SocketManager {
-    static init() {
         this.socket = io();
         this.playerId = this.generatePlayerId();
         this.roomId = null;
@@ -11,8 +10,6 @@ class SocketManager {
         document.getElementById('connection-status').textContent = '🟢 已连接';
       });
  this.socket.emit('player-id', this.playerId);
- this.socket.emit('player-id', this.playerId);
- console.log('Sent player-id:', this.playerId);
       this.socket.on('disconnect', () => {
         document.getElementById('connection-status').className = 'disconnected';
         document.getElementById('connection-status').textContent = '🔴 断开连接';
@@ -22,7 +19,11 @@ class SocketManager {
         this.socket.on('room-update', (rooms) => {
             console.log('Received room-update:', rooms);
             this.updateRoomDisplay(rooms);
-            if (this.roomId && rooms[this.roomId] && rooms[this.roomId].players.length === 4) {
+            // Hide ready button if room is full and player is in that room
+            // This handles the case where a player joins a full room that auto-starts
+            if (this.roomId && rooms[this.roomId] && rooms[this.roomId].players.includes(this.playerId) && rooms[this.roomId].players.length === 4) {
+                document.getElementById('ready-button').style.display = 'none';
+            } else if (this.roomId && rooms[this.roomId] && rooms[this.roomId].players.includes(this.playerId) && rooms[this.roomId].players.length < 4) {
                 document.getElementById('ready-button').style.display = 'none';
             }
         });
@@ -38,7 +39,6 @@ class SocketManager {
             document.getElementById('room-list').style.display = 'none';
         });
 
-      this.setupRoomJoinButtons();
       this.setupPassButton();
         this.socket.on('card:update', data => {
           const event = new CustomEvent('card:update', { detail: data });
@@ -65,6 +65,7 @@ class SocketManager {
       static setupRoomJoinButtons() {
         document.querySelectorAll('.join-button').forEach(button => {
           button.addEventListener('click', (event) => {
+            // Use a check to prevent joining if already in a room
             const roomId = event.target.closest('.room').dataset.roomId;
             console.log('Join button clicked for room:', roomId);
             if (this.roomId) {
@@ -76,7 +77,6 @@ class SocketManager {
             this.socket.emit('join-room', roomId, this.playerId);
             document.getElementById('room-list').style.display = 'none';
             document.getElementById('ready-button').style.display = 'block';
-
           });
         });
       }

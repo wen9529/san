@@ -1,5 +1,16 @@
 /* public/css/style.css */
 :root {
+  width: var(--card-width);
+  height: var(--card-height);
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+:root {
   --card-width: 140px;
   --card-height: 190px;
 }
@@ -34,17 +45,6 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
   gap: 15px;
   justify-content: center;
-}
-
-.game-card {
-  width: var(--card-width);
-  height: var(--card-height);
-  position: relative;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  transition: transform 0.2s ease;
-  cursor: pointer;
 }
 
 .game-card:hover {
@@ -114,6 +114,20 @@ body {
   height: 100%;
   object-fit: cover;
 }
+
+.game-rules {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+}
+
+.game-rules h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #00ff88;
+}
+
 
 .card-label {
   position: absolute;
