@@ -5,20 +5,24 @@ import { Game } from './game.js';
 
 class CardRenderer {
   constructor() {
- this.cardContainer = document.getElementById('card-container');
- this.suits = {
- clubs: '♣',
- spades: '♠',
- diamonds: '♦',
- hearts: '♥'
- };
-
+    this.cardContainer = document.getElementById('card-container');
+    this.playedCardsContainer = document.getElementById('played-cards-container'); // Assuming you add this div in your HTML
+    this.currentPlayerDisplay = document.getElementById('current-player-display'); // Assuming you add this div in your HTML
+    this.suits = {
+      clubs: '♣',
+      spades: '♠',
+      diamonds: '♦',
+      hearts: '♥'
+    };
+    this.selectedCards = [];
   }
   static init() {
+    const renderer = new this(); // Create an instance to access instance properties
     document.addEventListener('card:deal', e => {
       const cards = e.detail;
- this.renderCards(cards);
+      renderer.renderCards(cards);
     });
+
 
     document.addEventListener('card:play', e => {
       card.addEventListener('click', this.handleClick);
@@ -26,30 +30,72 @@ class CardRenderer {
   }
 
   static renderCards(cards) {
- cards.forEach(card => {
- const cardElement = document.createElement('div');
- cardElement.classList.add('game-card');
- cardElement.dataset.rank = card.rank;
- cardElement.dataset.suit = card.suit;
- cardElement.textContent = `${card.rank}${card.suit}`;
- cardElement.addEventListener('click', (e) => {
- const data = {
- suit: e.currentTarget.dataset.suit,
- rank: e.currentTarget.dataset.rank,
- playerId: SocketManager.playerId
- };
- SocketManager.socket.emit('card:play', data);
- e.currentTarget.classList.add('selected');
- });
-
- this.cardContainer.appendChild(cardElement);
+    const renderer = new this(); // Create an instance to access instance properties
+    renderer.cardContainer.innerHTML = ''; // Clear previous cards
+    cards.forEach(card => {
+      const cardElement = document.createElement('div');
+      cardElement.classList.add('game-card');
+      cardElement.dataset.rank = card.rank;
+      cardElement.dataset.suit = card.suit;
+      // You might want to use images instead of text content later
+      cardElement.textContent = `${card.rank}${renderer.suits[card.suit.toLowerCase()]}`;
+      cardElement.addEventListener('click', () => {
+        renderer.toggleCardSelection(cardElement, card);
+      });
+      renderer.cardContainer.appendChild(cardElement);
     });
   }
 
+  static renderPlayedCards(playedCards) {
+    const renderer = new this(); // Create an instance
+    renderer.playedCardsContainer.innerHTML = ''; // Clear previous played cards
+    if (playedCards && playedCards.length > 0) {
+      playedCards.forEach(card => {
+        const cardElement = document.createElement('div');
+        cardElement.classList.add('game-card', 'played');
+        cardElement.dataset.rank = card.rank;
+        cardElement.dataset.suit = card.suit;
+        // You might want to use images instead of text content later
+        cardElement.textContent = `${card.rank}${renderer.suits[card.suit.toLowerCase()]}`;
+        renderer.playedCardsContainer.appendChild(cardElement);
+      });
+    }
+  }
+
+  static updateCurrentPlayer(playerId) {
+    const renderer = new this(); // Create an instance
+    // You'll likely want to map player IDs to something more user-friendly (e.g., "You", "Player 2")
+    renderer.currentPlayerDisplay.textContent = `Current Turn: ${playerId}`;
+  }
+
+  static toggleCardSelection(cardElement, card) {
+    const renderer = new this(); // Create an instance
+    const index = renderer.selectedCards.findIndex(c => c.rank === card.rank && c.suit === card.suit);
+
+    if (index > -1) {
+      // Card is already selected, unselect it
+      renderer.selectedCards.splice(index, 1);
+      cardElement.classList.remove('selected');
+    } else {
+      // Card is not selected, select it
+      renderer.selectedCards.push(card);
+      cardElement.classList.add('selected');
+    }
+    console.log('Selected Cards:', renderer.selectedCards);
+  }
+
+  static playSelectedCards() {
+    const renderer = new this(); // Create an instance
+    if (renderer.selectedCards.length > 0) {
+      // Emit the 'card:play' event with the selected cards
+      SocketManager.socket.emit('card:play', { cards: renderer.selectedCards, playerId: SocketManager.playerId });
+      renderer.selectedCards = []; // Clear selected cards after playing
+    }
+  }
+
   static handleClick(e) {
- const data = e.detail;
- const card = document.querySelector(`[data-suit="${data.suit}"][data-rank="${data.rank}"]`);
- card?.classList.add('played');
+    // This method seems unused based on the provided code and the new toggleCardSelection logic.
+    // You might want to remove or refactor it.
   }
 }
 

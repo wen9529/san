@@ -39,6 +39,7 @@ class SocketManager {
         });
 
       this.setupRoomJoinButtons();
+      this.setupPassButton();
         this.socket.on('card:update', data => {
           const event = new CustomEvent('card:update', { detail: data });
           document.dispatchEvent(event);
@@ -88,6 +89,16 @@ class SocketManager {
         readyButton.disabled = true;
 
       });
+    }
+
+    static setupPassButton() {
+      const passButton = document.getElementById('pass-button'); // Assuming you have a button with id 'pass-button' in your HTML
+      if (passButton) {
+        passButton.addEventListener('click', () => {
+          console.log('Pass button clicked', this.playerId, this.roomId);
+          this.socket.emit('card:pass', this.roomId, this.playerId);
+        });
+      }
     }
     static generatePlayerId() {
       return Math.random().toString(36).substring(2, 9);

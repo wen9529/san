@@ -4,9 +4,12 @@ import { SocketManager } from './socket_handler.js';
 class Game {
     constructor() {
         this.hand = [];
-        this.playedCards = [];
+        this.currentPlay = null; // Store the last played cards
+        this.currentPlayer = null; // Store the ID of the player whose turn it is
+        this.playersPassed = []; // Store players who passed in the current round
     }
 
+    // Initialize game event listeners
     static init() {
         SocketManager.socket.on('card:deal', data => {
             this.dealCards(data);
@@ -16,6 +19,23 @@ class Game {
             this.updateCardStatus(data);
         });
 
+        // Listen for updates to the current play
+        SocketManager.socket.on('game:currentPlay', data => {
+            this.currentPlay = data;
+            console.log('Current play updated:', this.currentPlay);
+            const event = new CustomEvent('game:currentPlay', { detail: this.currentPlay });
+            document.dispatchEvent(event);
+        });
+
+        // Listen for updates to the current player
+        SocketManager.socket.on('game:currentPlayer', playerId => {
+            this.currentPlayer = playerId;
+            console.log('Current player updated:', this.currentPlayer);
+            const event = new CustomEvent('game:currentPlayer', { detail: this.currentPlayer });
+            document.dispatchEvent(event);
+        });
+
+        // Listen for when a card is played
         SocketManager.socket.on('card:played', data => {
  this.handleCardPlayed(data);
         });
@@ -28,6 +48,7 @@ class Game {
         document.dispatchEvent(event);
     }
 
+    // Update the visual status of a card (basic implementation)
     static updateCardStatus(data) {
         console.log('card status update', data);
         if (data.playerId != SocketManager.playerId) {
@@ -38,15 +59,17 @@ class Game {
     }
 
     static handleCardPlayed(data) {
-        console.log('Card played:', data);
-        // If the played card belongs to the current player, remove it from hand
- if (data.playerId === SocketManager.playerId) {
-            this.hand = this.hand.filter(card => !(card.rank === data.rank && card.suit === data.suit));
+        console.log('Card played event received:', data);
+        // If the played card belongs to this client's player, remove it from hand
+        if (data.playerId === SocketManager.playerId) {
+            // Assuming data.cards is an array of cards played by the player
+            this.hand = this.hand.filter(handCard =>
+                !data.cards.some(playedCard => playedCard.rank === handCard.rank && playedCard.suit === handCard.suit)
+            );
             console.log('Updated hand:', this.hand);
- }
-        // Trigger event to notify renderer to update played cards display
-        const event = new CustomEvent('card:played', { detail: data });
-        document.dispatchEvent(event);
+            const event = new CustomEvent('hand:update', { detail: this.hand });
+            document.dispatchEvent(event);
+        }
     }
 }
 
