@@ -72,6 +72,7 @@ io.on('connection', (socket) => {
     player.roomId = roomId;
     rooms[roomId].players.push({ id: player.id, socketId: socket.id, ready: false, finished: false, hands: { front: [], middle: [], back: [] } }); // Initialize hands structure
     console.log(`Player ${player.id} joined room ${roomId}`);
+    io.emit('room-update', rooms); // Notify all clients about the room update
   }
 
   // Implement leaving a room

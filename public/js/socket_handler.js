@@ -78,9 +78,11 @@ class SocketManager {
         this.socket.on('joined-room', (roomId) => {
             console.log('Joined room:', roomId);
             this.roomId = roomId;
-            document.getElementById('room-list').style.display = 'none';
-            document.getElementById('ready-button').style.display = 'block';
-            // Potentially hide other room-related UI here
+            // Hide the room lobby and show the game container and controls
+            document.getElementById('room-lobby').style.display = 'none';
+            document.getElementById('game-container').style.display = 'grid'; // Or 'block' depending on your CSS display for game-container
+            document.getElementById('game-controls').style.display = 'block';
+            document.getElementById('ready-button').style.display = 'block'; // Show ready button within game controls
         });
 
         // Handle player joining/leaving within a room (for UI updates)
@@ -96,7 +98,7 @@ class SocketManager {
     }
 
       static renderRoomList(rooms) {
-        const roomListContainer = document.getElementById('room-list-container'); // Assuming you have a container with this ID
+        const roomListContainer = document.getElementById('room-list'); // Assuming you have a container with this ID
         if (!roomListContainer) {
             console.error('Room list container not found');
             return;
