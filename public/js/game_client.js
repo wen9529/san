@@ -19,16 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const playButton = document.getElementById('play-card-button');
     const passButton = document.getElementById('pass-button');
 
-    playButton.addEventListener('click', () => {
- CardRenderer.playSelectedCards(SocketManager.instance.socket, SocketManager.instance.roomId, SocketManager.instance.playerId); // CardRenderer will emit the socket event
-    });
-
-    passButton.addEventListener('click', () => {
-        if (SocketManager.instance && SocketManager.instance.socket && SocketManager.instance.roomId && SocketManager.instance.playerId) {
-            SocketManager.instance.socket.emit('card:pass', { roomId: SocketManager.instance.roomId, playerId: SocketManager.instance.playerId });
-        }
-    });
-
     // Listen for game state updates
     if (SocketManager.instance && SocketManager.instance.socket) {
         SocketManager.instance.socket.on('game-state-update', (gameState) => {
@@ -42,6 +32,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+// Function to display the list of available rooms
+function displayRooms(rooms) {
+    const roomListDiv = document.getElementById('room-list');
+    if (!roomListDiv) return;
+
+    roomListDiv.innerHTML = ''; // Clear the current list
+
+    // Assuming rooms is an array of room objects from the server
+    // Each room object should at least have an 'id' and 'name'
+    rooms.forEach(room => {
+        const roomElement = document.createElement('div');
+        roomElement.classList.add('room-item'); // Add a class for styling
+        roomElement.innerHTML = `
+            <span>${room.name} (Players: ${room.players.length}/4) - Status: ${room.state}</span>
+            <button class="join-room-button" data-room-id="${room.id}">加入房间</button>
+        `;
+
+        // Add event listener to the Join Room button
+        roomElement.querySelector('.join-room-button').addEventListener('click', () => {
+            SocketManager.instance.joinRoom(room.id); // Use SocketManager to emit join-room
+        });
+        roomListDiv.appendChild(roomElement);
+    });
+}
 
 // Function to display player's hand
 function displayHand(cards) {

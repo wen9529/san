@@ -25,6 +25,19 @@ const io = new Server(server);
 // Simple in-memory room management
 const rooms = {}; // { roomId: { name: roomName, players: [{ id: playerId, socketId: socketId, ready: false, finished: false, hands: { front: [], middle: [], back: [] } }], state: 'waiting', deck: null, currentPlayerIndex: 0, currentHand: null, playedHands: {} } }
 
+// Initialize 5 fixed rooms
+for (let i = 1; i <= 5; i++) {
+  const roomId = `room${i}`; // Simple fixed room ID
+  rooms[roomId] = {
+    name: `房间 ${i}`,
+    players: [],
+    state: 'waiting',
+    playedHands: {},
+    deck: null,
+    hands: {}
+  };
+}
+
 // Serve static files (e.g., HTML, CSS, client-side JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -40,30 +53,11 @@ io.on('connection', (socket) => {
     socket.emit('room-list', rooms);
   });
 
-  socket.on('create-room', ({ roomName, playerId }) => {
-    const roomId = generateRoomId(); // Implement a function to generate unique room IDs
-    rooms[roomId] = {
-      name: roomName,
-      players: [],
-      state: 'waiting',
-      playedHands: {}, // Store the three hands played by each player
- deck: null,
- hands: {}
-    };
-    console.log(`Room created: ${roomId} by player ${playerId}`);
-    socket.emit('joined-room', roomId);
-    joinRoom(socket, roomId, player);
-  });
-
   socket.on('join-room', (roomId, playerId) => {
-    if (rooms[roomId] && rooms[roomId].players.length < 4) { // Assuming max 4 players
+    if (rooms[roomId] && rooms[roomId].players.length < 4) {
       socket.emit('joined-room', roomId);
       joinRoom(socket, roomId, player);
-    } else if (rooms[roomId] && rooms[roomId].players.length >= 4) {
-      socket.emit('join-room-error', 'Room is full');
-    } else {
-      socket.emit('join-room-error', 'Room not found');
-    }
+    } else if (rooms[roomId]) {socket.emit('join-room-error', 'Room is full');} else {socket.emit('join-room-error', 'Room not found');}
   });
 
   socket.on('disconnect', () => {
@@ -77,7 +71,6 @@ io.on('connection', (socket) => {
   function joinRoom(socket, roomId, player) {
     player.roomId = roomId;
     rooms[roomId].players.push({ id: player.id, socketId: socket.id, ready: false, finished: false, hands: { front: [], middle: [], back: [] } }); // Initialize hands structure
-    io.emit('room-update', rooms); // Notify all clients about the room update
     console.log(`Player ${player.id} joined room ${roomId}`);
   }
 
@@ -105,8 +98,7 @@ io.on('connection', (socket) => {
         // Check if all players are ready and room is full
         if (rooms[roomId].players.length === 4 && rooms[roomId].players.every(p => p.ready)) {
           startGame(roomId);
-          io.to(roomId).emit('game-start'); // Notify players in the room that the game is starting
- io.emit('room-update', rooms); // Notify all about room state change
+          io.to(roomId).emit('game-start'); // Notify players in the room that the game is starting (Optional, room-update might be sufficient)
  }
       }
     }
@@ -115,8 +107,8 @@ io.on('connection', (socket) => {
   function startGame(roomId) {
     console.log(`Starting game in room ${roomId}`);
     rooms[roomId].state = 'playing';
+    io.emit('room-update', rooms); // Notify all about room state change
     dealCards(roomId);
- io.emit('room-update', rooms); // Notify all about room state change
   }
 
   // Handle player playing cards
@@ -183,6 +175,8 @@ io.on('connection', (socket) => {
       const results = calculateScores(room);
       io.to(roomId).emit('game-end', results);
       // Reset room state for a new game or return to lobby
+      // Clear played hands after scoring
+      room.playedHands = {};
       resetRoom(roomId);
     } else {
       // Notify clients about players who have finished arranging hands
@@ -197,6 +191,7 @@ io.on('connection', (socket) => {
   // Basic scoring logic (needs to be implemented based on Shisanshui rules)
   function calculateScores(room) {
     console.log('Calculating scores for room', room.id);
+    room.playedHands = {};
     const scores = {};
 
     const playedHands = room.playedHands;
@@ -503,10 +498,10 @@ function dealCards(roomId) {
   // Deal 13 cards to each player
   room.players.forEach(player => {
     player.hand = deck.deal(13); // Deal cards to player object directly
-    // Emit the dealt cards to the specific player
- io.to(player.socketId).emit('deal_cards', player.hand);
     // Reset finished status for the new game
     player.finished = false;
+    // Emit the dealt cards to the specific player
+    io.to(player.socketId).emit('deal_cards', player.hand);
   });
   // Set the first player's turn
   room.currentPlayerIndex = 0;
@@ -522,11 +517,11 @@ function resetRoom(roomId) {
   // Clear players' hands and played hands
   room.players.forEach(player => {
     player.hand = [];
-    player.finished = false;
-    player.hands = { front: [], middle: [], back: [] };
+    player.finished = false; // Ensure finished status is reset
+    player.hands = { front: [], middle: [], back: [] }; // Clear arranged hands
   });
-  room.currentPlayerIndex = 0;
-  room.currentHand = null;
- room.playedHands = {};
+  room.currentPlayerIndex = 0; // Reset current player index
+  room.currentHand = null; // Clear current played hand (if applicable)
+  room.playedHands = {}; // Clear played hands for scoring
  io.to(roomId).emit('room-reset'); // Notify players in the room (optional, could just rely on room-update)
 }
