@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const playButton = document.getElementById('play-card-button');
 
+    const readyButton = document.getElementById('ready-button'); // Get the ready button
+
     // Listen for custom events dispatched from socket_handler.js
     document.addEventListener('room-list', (event) => {
         displayRooms(event.detail);
@@ -28,6 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
         roomLobby.style.display = 'none';
         gameContainer.style.display = 'block';
         console.log('Successfully joined room:', event.detail);
+ if (readyButton) {
+ readyButton.style.display = 'block'; // Show the ready button
+ }
     });
     const passButton = document.getElementById('pass-button'); // Make sure this is correctly referenced
 
