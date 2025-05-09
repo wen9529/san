@@ -1,7 +1,7 @@
 /* public/css/style.css */
 :root {
   --player-area-height: 15vh; /* Adjusted player area height */
-  --player-area-width: 15vw; /* Adjusted player area width */
+  --player-area-width: 12vw; /* Adjusted player area width */
   --card-width: 140px;
   --card-height: 190px;
   --button-padding: 10px 20px;

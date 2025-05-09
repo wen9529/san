@@ -120,11 +120,10 @@ class SocketManager {
             if (room.players.length >= 4) {
                 joinButton.disabled = true; // Disable if room is full
             }
-            // Pass the current SocketManager instance to the event listener
-            joinButton.addEventListener('click', (function(currentSocketManager, id) { 
+            joinButton.addEventListener('click', () => {
                 console.log('Joining room:', id);
-                SocketManager.socket.emit('join-room', id, SocketManager.playerId);
-            })(SocketManager.instance, id)); // <-- Added the missing closing parenthesis and immediately invoked the function
+                SocketManager.instance.socket.emit('join-room', id, SocketManager.instance.playerId);
+            });
 
             roomListContainer.appendChild(roomElement);
         }

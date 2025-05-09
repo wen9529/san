@@ -62,7 +62,7 @@ function displayRooms(rooms) {
 
         // Add event listener to the Join Room button
         roomElement.querySelector('.join-room-button').addEventListener('click', () => {
-            SocketManager.instance.joinRoom(room.id); // Use SocketManager to emit join-room
+            SocketManager.instance.socket.emit('join-room', room.id, SocketManager.instance.playerId); // Use SocketManager instance's socket to emit join-room
         });
         roomListDiv.appendChild(roomElement);
     });
