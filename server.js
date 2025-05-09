@@ -478,9 +478,6 @@ io.on('connection', (socket) => {
     }
   });
 
-    }
-  });
-
   // You can add more Socket.IO event handlers here for your game logic
 });
 

@@ -240,7 +240,6 @@ function isFourTriples(cards) {
     }
     return false;
 }
-}
 
 // Function to check if 13 cards are all of one color (all red or all black) ("凑一色" - All One Color)
 function isAllOneColor(cards) {
@@ -326,7 +325,6 @@ function isFivePairsOneTriple(cards) {
 
     // For Five Pairs and a Triple, we need exactly 5 pairs and 1 triple.
     return pairCount === 5 && tripleCount === 1;
-}
 }
 // Function to evaluate a 13-card hand for special hands
 // Checks for special hands in descending order of priority
