@@ -19,6 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const playButton = document.getElementById('play-card-button');
     const passButton = document.getElementById('pass-button');
 
+    // Listen for room list updates
+    if (SocketManager.instance && SocketManager.instance.socket) {
+        SocketManager.instance.socket.on('room-list', (rooms) => {
+            displayRooms(rooms);
+        });
+        SocketManager.instance.socket.on('room-update', (rooms) => {
+            displayRooms(rooms);
+        });
+    }
+
     // Listen for game state updates
     if (SocketManager.instance && SocketManager.instance.socket) {
         SocketManager.instance.socket.on('game-state-update', (gameState) => {
