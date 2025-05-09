@@ -187,6 +187,19 @@ body {
 }
 
 
+/* Styles for hand type display */
+.hand-type {
+  font-size: 0.9em;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.special-hand-type {
+  font-weight: bold;
+  color: gold; /* Highlight color for special hands */
+}
+
+
 .card-label {
   position: absolute;
   bottom: 10px;

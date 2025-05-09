@@ -5,30 +5,43 @@
 // for combinations, sending moves to the server, and updating the UI
 // based on game state received from the server.
 
+import { CardRenderer } from './card_renderer.js';
+import { SocketManager } from './socket_handler.js';
+
+const gameContainer = document.getElementById('game-container');
+const roomLobby = document.getElementById('room-lobby');
+const gameInfo = document.getElementById('game-info');
 // Basic structure for the client game logic
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('game_client.js loaded');
 
-    // TODO: Initialize game elements and event listeners
+    const playButton = document.getElementById('play-card-button');
+    const passButton = document.getElementById('pass-button');
+
+    playButton.addEventListener('click', () => {
+ CardRenderer.playSelectedCards(SocketManager.instance.socket, SocketManager.instance.roomId, SocketManager.instance.playerId); // CardRenderer will emit the socket event
+    });
+
+    passButton.addEventListener('click', () => {
+        if (SocketManager.instance && SocketManager.instance.socket && SocketManager.instance.roomId && SocketManager.instance.playerId) {
+            SocketManager.instance.socket.emit('card:pass', { roomId: SocketManager.instance.roomId, playerId: SocketManager.instance.playerId });
+        }
+    });
+
+    // Listen for game state updates
+    if (SocketManager.instance && SocketManager.instance.socket) {
+        SocketManager.instance.socket.on('game-state-update', (gameState) => {
+            handleGameStateUpdate(gameState);
+        });
+
+        // Listen for game end event
+        SocketManager.instance.socket.on('game-end', (results) => {
+            handleGameEnd(results);
+        });
+    }
+
 });
-
-// Function to handle receiving dealt cards from the server
-window.handleDealCards = function(cardsData) {
- console.log('Received dealt cards:', cardsData);
-
-    // Get the container to display the cards
- const playerBottom = document.getElementById('player-bottom');
-
- if (playerBottom) {
- playerBottom.innerHTML = ''; // Clear any existing content
-        // For each card, create an element and append it to the container
- cardsData.forEach(cardData => {
- const cardElement = createCardElement(cardData); // createCardElement is assumed to be in card.js
- playerBottom.appendChild(cardElement);
- });
- }
-}
 
 // Function to display player's hand
 function displayHand(cards) {
@@ -50,12 +63,82 @@ function displayHand(cards) {
 // Function to handle server game state updates
 function handleGameStateUpdate(gameState) {
     console.log('Received game state update:', gameState);
-    // TODO: Update UI based on the received game state
-    // This might include:
-    // - Updating player scores
-    // - Indicating the current player's turn
-    // - Displaying played hands
-    // - Showing messages (e.g., "Waiting for other players")
+
+    // Hide lobby and show game container if not already
+    roomLobby.style.display = 'none';
+    gameContainer.style.display = 'block';
+    gameInfo.style.display = 'none'; // Hide game info during play
+
+    // Update current player indicator
+    CardRenderer.updateCurrentPlayer(gameState.currentPlayer);
+
+    // Display the last played cards
+    CardRenderer.renderPlayedCards(gameState.playedCards);
+
+    // Update player's hand display (only if the hand size changes, or when a card is played)
+    // A more robust solution would be to receive the updated hand in the game state,
+    // but for now, we'll assume the player's own hand is managed locally after playing.
+    // However, initially dealing and after playing from other players, we need to update.
+    // Assuming gameState.hands contains the current player's hand after playing
+    if (gameState.hands && gameState.hands[SocketManager.instance.playerId]) {
+        CardRenderer.renderCards(gameState.hands[SocketManager.instance.playerId]);
+    }
+
+    // Update other players' hand sizes (assuming gameState includes this information)
+    // This requires elements in index.html for each player's hand size display
+    // Assuming gameState.players is an array of player objects with id and handSize
+    const playersInRoom = gameState.players; // Use players array from game state
+    playersInRoom.forEach(player => {
+        // Find the corresponding player area element based on their position relative to the current player
+        // This requires knowing the order of players in the room, which is complex.
+        // For simplicity, let's update hand size for all other players.
+        // You'll need to add elements in your HTML for each player's hand size.
+        if (player.id !== SocketManager.instance.playerId) {
+            const handSizeElement = document.getElementById(`player-${player.position}-hand-size`); // Assuming elements like player-top-hand-size, etc.
+            if (handSizeElement) {
+ handSizeElement.textContent = `手牌: ${player.handSize}`;
+            }
+        }
+    });
+
+    // TODO: Add logic to handle other aspects of game state, e.g., scores, messages, game phase
+    // Example: Display game messages
+    // document.getElementById('game-status').textContent = gameState.message;
+
+    // Enable/disable play/pass buttons based on whose turn it is
+    const myTurn = gameState.currentPlayer === SocketManager.instance.playerId;
+    playButton.disabled = !myTurn;
+    passButton.disabled = !myTurn;
+}
+
+// Function to handle game end
+function handleGameEnd(results) {
+    console.log('Game ended:', results);
+
+    // Display game results (e.g., scores, rankings)
+    const resultsDisplay = document.createElement('div');
+    resultsDisplay.classList.add('game-results');
+    let resultsHTML = '<h2>游戏结束!</h2>';
+    resultsHTML += '<h3>得分:</h3><ul>';
+    results.scores.forEach(score => {
+        resultsHTML += `<li>玩家 ${score.playerId}: ${score.points} 分</li>`;
+    });
+    resultsHTML += '</ul>';
+
+    // Display rankings (assuming results include rankings)
+    if (results.rankings) {
+        resultsHTML += '<h3>排名:</h3><ol>';
+        results.rankings.forEach((playerId, index) => {
+            resultsHTML += `<li>玩家 ${playerId}</li>`;
+        });
+        resultsHTML += '</ol>';
+    }
+
+    resultsDisplay.innerHTML = resultsHTML;
+    gameContainer.appendChild(resultsDisplay); // Append results to the game container or a dedicated results area
+
+    // Provide options to play again or return to lobby
+    // TODO: Add buttons for "Play Again" and "Return to Lobby" and their event listeners
 }
 
 // Function to handle card selection by the player

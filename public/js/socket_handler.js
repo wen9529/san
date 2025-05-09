@@ -3,11 +3,13 @@
 // Assuming game_client.js is loaded before this script and provides a global `gameClient` object or functions.
 class SocketManager {
     constructor() {
- this.socket = io();
-        this.roomId = null;
- this.playerId = this.generatePlayerId();
+        SocketManager.instance = this;
 
-        this.setupConnectionHandlers();
+        this.socket = io();
+
+        this.roomId = null;
+ this.playerId = SocketManager.generatePlayerId();
+
         this.setupRoomHandlers();
         this.setupGameHandlers();
         this.setupControlButtons();
@@ -16,17 +18,18 @@ class SocketManager {
         document.getElementById('connection-status').className = 'connected';
         console.log('Connected to server', this.socket.id);
         document.getElementById('connection-status').textContent = '🟢 已连接';
- this.socket.emit('player-id', this.playerId);
+        this.socket.emit('player-id', this.playerId);
+    }
+
+    // Static method to get the singleton instance
+    static init() {
+        return SocketManager.instance;
     }
     setupConnectionHandlers() {
       this.socket.on('disconnect', () => {
         document.getElementById('connection-status').className = 'disconnected';
-        document.getElementById('connection-status').textContent = '🔴 断开连接';
-        document.getElementById('connection-status').textContent = '🔴 断开连接';
         setTimeout(() => SocketManager.init(), 5000);
       });
- this.socket = io();
-        this.playerId = this.generatePlayerId();
     }
 
     setupGameHandlers() {
@@ -40,10 +43,11 @@ class SocketManager {
             this.updateRoomDisplay(rooms);
             // Hide ready button if room is full and player is in that room
             // This handles the case where a player joins a full room that auto-starts
+            // Corrected logic to only show ready button if in a room and room is not full
             if (this.roomId && rooms[this.roomId] && rooms[this.roomId].players.includes(this.playerId) && rooms[this.roomId].players.length === 4) {
                 document.getElementById('ready-button').style.display = 'none';
             } else if (this.roomId && rooms[this.roomId] && rooms[this.roomId].players.includes(this.playerId) && rooms[this.roomId].players.length < 4) {
-                document.getElementById('ready-button').style.display = 'none';
+                document.getElementById('ready-button').style.display = 'block';
             }
             this.updateGameStatus('房间列表已更新'); // Example status update
         });
@@ -52,7 +56,6 @@ class SocketManager {
  const event = new CustomEvent('card:update', { detail: data });
  document.dispatchEvent(event);
         });
-    }
 
         this.socket.on('game-start', () => {
             console.log('Received game-start!');
@@ -69,7 +72,7 @@ class SocketManager {
     setupRoomHandlers() {
         this.socket.on('room-list', (rooms) => {
             console.log('Received room-list:', rooms);
-            this.renderRoomList(rooms);
+            SocketManager.renderRoomList(rooms);
         });
 
         this.socket.on('joined-room', (roomId) => {
@@ -117,10 +120,11 @@ class SocketManager {
             if (room.players.length >= 4) {
                 joinButton.disabled = true; // Disable if room is full
             }
-            joinButton.addEventListener('click', () => {
+            // Pass the current SocketManager instance to the event listener
+            joinButton.addEventListener('click', (function(currentSocketManager, id) { 
                 console.log('Joining room:', id);
                 SocketManager.socket.emit('join-room', id, SocketManager.playerId);
-            });
+            })(SocketManager.instance, id)); // <-- Added the missing closing parenthesis and immediately invoked the function
 
             roomListContainer.appendChild(roomElement);
         }
@@ -153,25 +157,6 @@ class SocketManager {
         }
 
 
-      static setupRoomJoinButtons() {
-        document.querySelectorAll('.join-button').forEach(button => {
-          button.addEventListener('click', (event) => {
-            // Use a check to prevent joining if already in a room
-            const roomId = event.target.closest('.room').dataset.roomId;
-            console.log('Join button clicked for room:', roomId);
-            if (this.roomId) {
-              console.log('Player already in room', this.roomId);
-              return;
-            }
-            this.roomId = roomId;
-            console.log('Emitting join-room:', roomId, this.playerId);
-            this.socket.emit('join-room', roomId, this.playerId);
-            document.getElementById('room-list').style.display = 'none';
-            document.getElementById('ready-button').style.display = 'block';
-          });
-        });
-      }
-
           readyButton.addEventListener('click', () => {
             console.log('Ready button clicked', this.playerId, this.roomId);
             SocketManager.socket.emit('ready', { roomId: this.roomId, playerId: this.playerId });
@@ -190,7 +175,6 @@ class SocketManager {
           });
         }
 
-    }
 
 
     static generatePlayerId() {
