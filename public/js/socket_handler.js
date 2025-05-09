@@ -35,26 +35,13 @@ class SocketManager {
     setupGameHandlers() {
         // Listen for the 'deal_cards' event from the server
         this.socket.on('deal_cards', (cardsData) => {
- console.log('Received dealt cards:', cardsData);
- gameClient.handleDealCards(cardsData); // Call a function in game_client.js
+            document.dispatchEvent(new CustomEvent('deal-cards', { detail: cardsData }));
         });
         this.socket.on('room-update', (rooms) => {
-            console.log('Received room-update:', rooms);
-            this.updateRoomDisplay(rooms);
-            // Hide ready button if room is full and player is in that room
-            // This handles the case where a player joins a full room that auto-starts
-            // Corrected logic to only show ready button if in a room and room is not full
-            if (this.roomId && rooms[this.roomId] && rooms[this.roomId].players.includes(this.playerId) && rooms[this.roomId].players.length === 4) {
-                document.getElementById('ready-button').style.display = 'none';
-            } else if (this.roomId && rooms[this.roomId] && rooms[this.roomId].players.includes(this.playerId) && rooms[this.roomId].players.length < 4) {
-                document.getElementById('ready-button').style.display = 'block';
-            }
-            this.updateGameStatus('房间列表已更新'); // Example status update
+            document.dispatchEvent(new CustomEvent('room-update', { detail: rooms }));
         });
-
         this.socket.on('card:update', data => {
- const event = new CustomEvent('card:update', { detail: data });
- document.dispatchEvent(event);
+ document.dispatchEvent(new CustomEvent('card:update', { detail: data }));
         });
 
         this.socket.on('game-start', () => {
@@ -72,28 +59,23 @@ class SocketManager {
     setupRoomHandlers() {
         this.socket.on('room-list', (rooms) => {
             console.log('Received room-list:', rooms);
-            SocketManager.renderRoomList(rooms);
+            document.dispatchEvent(new CustomEvent('room-list', { detail: rooms }));
         });
 
         this.socket.on('joined-room', (roomId) => {
             console.log('Joined room:', roomId);
             this.roomId = roomId;
-            // Hide the room lobby and show the game container and controls
-            document.getElementById('room-lobby').style.display = 'none';
-            document.getElementById('game-container').style.display = 'grid'; // Or 'block' depending on your CSS display for game-container
-            document.getElementById('game-controls').style.display = 'block';
-            document.getElementById('ready-button').style.display = 'block'; // Show ready button within game controls
+            document.dispatchEvent(new CustomEvent('joined-room', { detail: roomId }));
         });
 
         // Handle player joining/leaving within a room (for UI updates)
         this.socket.on('player-joined-room', ({ roomId, playerId }) => {
             console.log(`Player ${playerId} joined room ${roomId}`);
-            // Update the UI for the specific room, e.g., player count
+            document.dispatchEvent(new CustomEvent('player-joined-room', { detail: { roomId, playerId } }));
         });
 
         this.socket.on('player-left-room', ({ roomId, playerId }) => {
-            console.log(`Player ${playerId} left room ${roomId}`);
-            // Update the UI for the specific room, e.g., player count
+            document.dispatchEvent(new CustomEvent('player-left-room', { detail: { roomId, playerId } }));
         });
     }
 

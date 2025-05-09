@@ -63,7 +63,6 @@ body {
   flex-direction: column;
   align-items: center; /* Center items horizontally */
   gap: 15px; /* Space between room items and create room section */
-  margin-top: 50px; /* Space above this section */
 }
 
 /* Individual room item styles */
@@ -96,32 +95,6 @@ body {
   object-fit: cover; /* Cover the card area */
 }
 
-/* Create room form/button styles */ /* Changed ID to be more specific */
-#create-room-section {
-  display: flex;
-  display: block; /* Remove extra space below image */
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Create room form/button styles */
-  gap: 10px;
-  align-items: center;
-}
-
-#create-room-input { /* Adjusted ID */
-
-#create-room-container input[type="text"] {
-  padding: var(--button-padding);
-  width: 100%; /* Ensure image covers the card */
-  height: 100%; /* Ensure image covers the card */
-  object-fit: cover;
-}
-
-#create-room-button { /* Adjusted ID */
-  padding: var(--button-padding);
-}
 
 /* Button container styles */
 .button-container {
@@ -167,11 +140,6 @@ body {
   background-color: #28a745; /* Example join button color */
   color: white;
   cursor: pointer;
-}
-.join-button { /* Specific style for join button */
-  background-color: #cccccc; /* Example disabled color */
-  cursor: not-allowed;
-}
 
 .game-rules {
   margin-top: 30px;
@@ -318,4 +286,11 @@ body {
   margin-left: 20px;
 }
 
+/* Hide game-info when game-container is visible */
+#game-container[style*="display: grid;"] ~ #game-info,\n#game-container[style*="display: block;"] ~ #game-info {\n  display: none;\n}
+
+/* Correct style for game-controls to be hidden initially */
+#game-controls {
+    display: none;
+}
 

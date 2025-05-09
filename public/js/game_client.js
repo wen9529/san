@@ -17,28 +17,37 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('game_client.js loaded');
 
     const playButton = document.getElementById('play-card-button');
-    const passButton = document.getElementById('pass-button');
 
-    // Listen for room list updates
-    if (SocketManager.instance && SocketManager.instance.socket) {
-        SocketManager.instance.socket.on('room-list', (rooms) => {
-            displayRooms(rooms);
-        });
-        SocketManager.instance.socket.on('room-update', (rooms) => {
-            displayRooms(rooms);
-        });
-    }
+    // Listen for custom events dispatched from socket_handler.js
+    document.addEventListener('room-list', (event) => {
+        displayRooms(event.detail);
+    });
 
-    // Listen for game state updates
-    if (SocketManager.instance && SocketManager.instance.socket) {
-        SocketManager.instance.socket.on('game-state-update', (gameState) => {
-            handleGameStateUpdate(gameState);
-        });
+    document.addEventListener('joined-room', (event) => {
+        // When successfully joined a room, hide lobby and show game container
+        roomLobby.style.display = 'none';
+        gameContainer.style.display = 'block';
+        console.log('Successfully joined room:', event.detail);
+    });
+    const passButton = document.getElementById('pass-button'); // Make sure this is correctly referenced
 
-        // Listen for game end event
-        SocketManager.instance.socket.on('game-end', (results) => {
+    // Listen for custom events dispatched from socket_handler.js
+    document.addEventListener('deal-cards', (event) => {
+        handleDealCards(event.detail);
+    });
+
+    document.addEventListener('game-state-update', (event) => {
+        handleGameStateUpdate(event.detail);
+    });
+    document.addEventListener('game-end', (event) => {
+        console.log('Custom game-end event received:', event.detail);
             handleGameEnd(results);
         });
+
+    document.addEventListener('join-room-error', (event) => {
+        // Display error message to the user, e.g., using an alert or a dedicated message area
+        console.error('Error joining room:', event.detail);
+        alert('加入房间失败: ' + event.detail); // Basic alert for demonstration
     }
 
 });
@@ -85,6 +94,18 @@ function displayHand(cards) {
     }
 }
 
+// Function to handle dealing cards
+function handleDealCards(cardsData) {
+    console.log('Handling dealt cards:', cardsData);
+    // Assuming cardsData is the array of cards for the current player
+    // You'll need to store this in a variable accessible to other game_client functions
+    // For example: playerHand = cardsData;
+    displayHand(cardsData); // Display the hand
+    // Optionally hide lobby, show game area, etc.
+    roomLobby.style.display = 'none';
+    gameContainer.style.display = 'block';
+    gameInfo.style.display = 'none'; // Hide game info during play
+}
 // Function to handle server game state updates
 function handleGameStateUpdate(gameState) {
     console.log('Received game state update:', gameState);
@@ -92,7 +113,6 @@ function handleGameStateUpdate(gameState) {
     // Hide lobby and show game container if not already
     roomLobby.style.display = 'none';
     gameContainer.style.display = 'block';
-    gameInfo.style.display = 'none'; // Hide game info during play
 
     // Update current player indicator
     CardRenderer.updateCurrentPlayer(gameState.currentPlayer);
@@ -140,6 +160,7 @@ function handleGameStateUpdate(gameState) {
 function handleGameEnd(results) {
     console.log('Game ended:', results);
 
+    gameInfo.style.display = 'block'; // Show game info after game ends
     // Display game results (e.g., scores, rankings)
     const resultsDisplay = document.createElement('div');
     resultsDisplay.classList.add('game-results');
