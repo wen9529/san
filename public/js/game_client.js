@@ -121,7 +121,7 @@ function displayHand(cards) {
         handElement.innerHTML = ''; // Clear current hand display
 
         cards.forEach(card => {
-            const cardElement = createCardElement(card); // createCardElement will be defined in card.js
+            const cardElement = CardRenderer.renderCard(card); // createCardElement will be defined in card.js
             handElement.appendChild(cardElement);
         });
     }
