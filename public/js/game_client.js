@@ -18,7 +18,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const playButton = document.getElementById('play-card-button');
 
+    const passButton = document.getElementById('pass-button'); // Make sure this is correctly referenced
+
     const readyButton = document.getElementById('ready-button'); // Get the ready button
+    const gameControls = document.getElementById('game-controls'); // Get the game controls container
+
+    // Hide play and pass buttons initially
+    if (playButton) {
+        playButton.style.display = 'none';
+    }
+    if (passButton) {
+        passButton.style.display = 'none';
+    }
 
     // Listen for custom events dispatched from socket_handler.js
     document.addEventListener('room-list', (event) => {
@@ -29,12 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // When successfully joined a room, hide lobby and show game container
         roomLobby.style.display = 'none';
         gameContainer.style.display = 'block';
+        if (gameControls) { // Check if game controls exist
+ gameControls.style.display = 'block !important'; // Show game controls, force display
+        }
         console.log('Successfully joined room:', event.detail);
- if (readyButton) {
- readyButton.style.display = 'block'; // Show the ready button
- }
+        if (readyButton) {
+            readyButton.style.display = 'block'; // Show the ready button initially
+        }
     });
-    const passButton = document.getElementById('pass-button'); // Make sure this is correctly referenced
 
     // Listen for custom events dispatched from socket_handler.js
     document.addEventListener('deal-cards', (event) => {
@@ -44,10 +57,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('game-state-update', (event) => {
         handleGameStateUpdate(event.detail);
     });
+
     document.addEventListener('game-end', (event) => {
         console.log('Custom game-end event received:', event.detail);
-            handleGameEnd(results);
-        });
+        handleGameEnd(event.detail); // Corrected to pass event.detail
+    });
+
+    document.addEventListener('game-start', (event) => {
+        console.log('Game started:', event.detail);
+        // When game starts, hide ready button and show play/pass buttons
+        if (readyButton) {
+            readyButton.style.display = 'none';
+        }
+        if (passButton) {
+            passButton.style.display = 'block';
+        }
+        if (playButton) { // Make sure to check for playButton here as well
+            playButton.style.display = 'block';
+        }
+    });
 
     document.addEventListener('join-room-error', (event) => {
         // Display error message to the user, e.g., using an alert or a dedicated message area
